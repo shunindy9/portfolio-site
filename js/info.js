@@ -2,20 +2,10 @@
  * for .reveal fade-up, and a 0.25x slow-down on the background video. */
 (function () {
 
-  // Background video — slow to 0.25x once it's playable. Set on both
-  // `canplay` (first load) and `loadedmetadata` (some browsers reset
-  // rate on metadata) so it sticks across loop boundaries.
-  var bgVideo = document.querySelector(".info-bg-video");
-  if (bgVideo) {
-    var SLOW = 0.25;
-    var applyRate = function () { bgVideo.playbackRate = SLOW; };
-    bgVideo.addEventListener("loadedmetadata", applyRate);
-    bgVideo.addEventListener("canplay", applyRate);
-    bgVideo.addEventListener("play", applyRate);
-    // Belt-and-braces: also set immediately in case the video is already
-    // ready when this script runs.
-    applyRate();
-  }
+  // Background video: slow motion (4x slower than source) is now BAKED
+  // INTO the encode via ffmpeg motion-compensated interpolation, so we
+  // play at normal speed. The file itself is 30s of smooth slow-mo at
+  // CRF 20 native 1024x1024 — way smoother than browser frame-hold.
 
   // Live JST clock (HH:MM, ticks every 30s).
   var clockEls = document.querySelectorAll(".jst-clock");
