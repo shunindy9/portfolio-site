@@ -29,6 +29,14 @@
 </head>
 <body class="info-page">
 
+  <!-- Looping background video. Muted + playsinline + autoplay so iOS
+       Safari runs it. preload=metadata so the page paints fast and the
+       video streams in. Dark/light scrim is applied via CSS overlay. -->
+  <video class="info-bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+    <source src="assets/video/hj-bg.mp4" type="video/mp4" />
+  </video>
+  <div class="info-bg-scrim" aria-hidden="true"></div>
+
   <a class="skip-link" href="#info-main">Skip to content</a>
 
   <header class="info-header">
@@ -45,6 +53,28 @@
       <p class="info-eyebrow">Personal Information</p>
       <h1 class="info-name">Shunsuke Otsuki</h1>
       <p class="info-tagline">Creative Director · Designer · Technologist — Tokyo.</p>
+
+      <!-- Direct-action CTAs. mailto: opens default mail app, tel: opens
+           the phone dialer on iOS/Android and FaceTime/Handoff on Mac. -->
+      <div class="info-cta-row">
+        <a class="info-cta info-cta--primary" href="mailto:shun.indy@gmail.com">
+          <span class="info-cta__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m3 7 9 6 9-6"/>
+            </svg>
+          </span>
+          <span class="info-cta__label">Email Me</span>
+        </a>
+        <a class="info-cta info-cta--secondary" href="tel:+818033557778">
+          <span class="info-cta__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <span class="info-cta__label">Call Me</span>
+        </a>
+      </div>
     </section>
 
     <section class="info-block info-block--contact reveal">
