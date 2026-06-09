@@ -410,19 +410,22 @@ body.is-loading .mask__inner { transform: translateY(110%); }
 .hero__inner {
   position: relative;
   z-index: 1;
-  max-width: 1040px;
+  max-width: 920px;
   width: 100%;
   margin: 0 auto;
-  padding: 132px 0 96px;
+  /* Slight optical compensation — proper-noun headlines in Archivo Black
+   * read heavier on the right (k, i ascenders + descenders); a small
+   * left nudge re-centers the apparent visual weight. */
+  padding: 132px 1.5ch 96px 0;
   text-align: center;
   will-change: transform;
 }
 .hero__name {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(48px, 10.8vw, 156px);
+  font-size: clamp(44px, 8.4vw, 120px);
   line-height: 0.92;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   margin: 0 0 22px;
   color: var(--text);
 }
