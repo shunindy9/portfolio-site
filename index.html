@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>Portfolio</title>
+  <meta name="description" content="Interactive designer & creative technologist based in Tokyo." />
+
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0b07'/><circle cx='16' cy='16' r='6' fill='%23ffb01f'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/style.css?v=2026060902" />
+
+  <!-- Apply theme BEFORE first paint so there's no dark→light flash on load.
+       Order: explicit user choice (localStorage) → OS preference → dark. -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("portfolio-theme");
+        var theme = saved
+          || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</head>
+<body class="is-loading">
+
+  <a class="skip-link" href="#capabilities">Skip to content</a>
+
+  <aside class="section-pager" aria-label="Section indicator">
+    <button class="section-pager__dot is-active" type="button" data-section="0" aria-label="Hero"></button>
+    <button class="section-pager__dot"           type="button" data-section="1" aria-label="Capabilities"></button>
+    <button class="section-pager__dot"           type="button" data-section="2" aria-label="About"></button>
+    <button class="section-pager__dot"           type="button" data-section="3" aria-label="Contact"></button>
+  </aside>
+
+  <header class="site-header" aria-label="Primary">
+    <div class="site-header__left">
+      <a href="#hero" class="site-mark" data-bind="name-mark" aria-label="Home">—</a>
+      <span class="status" data-bind="status" hidden>
+        <span class="status__dot" aria-hidden="true"></span>
+        <span class="status__label">Available for work</span>
+      </span>
+    </div>
+    <nav class="site-nav" aria-label="Section navigation">
+      <a href="#capabilities" data-bind-attr="capsLink"><span class="nav-idx" aria-hidden="true">01</span><span class="nav-label" data-bind="navCaps">Capabilities</span></a>
+      <a href="#about"><span class="nav-idx" aria-hidden="true">02</span><span class="nav-label" data-bind="navAbout">About</span></a>
+      <a href="#contact" class="nav-cta"><span class="nav-label" data-bind="navContact">Contact</span></a>
+      <div class="theme-toggle" role="group" aria-label="Toggle dark / light theme" data-state="dark">
+        <span class="theme-toggle__indicator" aria-hidden="true"></span>
+        <button type="button" class="theme-toggle__btn" data-theme="light" aria-label="Light theme" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+        <button type="button" class="theme-toggle__btn" data-theme="dark" aria-label="Dark theme" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="lang-toggle" role="group" data-bind-attr="langAria" aria-label="Switch site language" data-state="en">
+        <span class="lang-toggle__indicator" aria-hidden="true"></span>
+        <button type="button" class="lang-toggle__btn" data-lang="ja" aria-pressed="false">
+          <span data-bind="langLabelJP">JP</span>
+        </button>
+        <button type="button" class="lang-toggle__btn" data-lang="en" aria-pressed="true">
+          <span data-bind="langLabelEN">EN</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Liquid SVG filter for the language toggle indicator (hidden, definition only). -->
+  <svg class="svg-defs" aria-hidden="true" focusable="false" width="0" height="0">
+    <defs>
+      <filter id="liquid-toggle" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.05 0.05" numOctaves="1" seed="1" result="t" />
+        <feGaussianBlur in="t" stdDeviation="2" result="bt" />
+        <feDisplacementMap in="SourceGraphic" in2="bt" scale="14" xChannelSelector="R" yChannelSelector="B" result="d" />
+        <feGaussianBlur in="d" stdDeviation="1.2" />
+      </filter>
+    </defs>
+  </svg>
+
+  <main id="main">
+
+    <!-- ====================== HERO ====================== -->
+    <section id="hero" class="hero" aria-label="Introduction">
+      <!--
+        Hero background visual. SWAPPABLE.
+        Replace the <canvas id="hero-canvas"> with a TouchDesigner <video> loop
+        or a WebGL/shader element later — nothing else on the page depends on it.
+      -->
+      <div class="hero__visual" aria-hidden="true">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero__grain"></div>
+        <div class="hero__vignette"></div>
+      </div>
+
+      <div class="hero__inner" data-parallax="0.04">
+        <p class="eyebrow mask"><span class="mask__inner" data-bind="eyebrow">—</span></p>
+        <h1 class="hero__name mask"><span class="mask__inner" data-bind="name">—</span></h1>
+        <p class="hero__role mask"><span class="mask__inner" data-bind="roleLabel">—</span></p>
+        <p class="hero__bio mask"><span class="mask__inner" data-bind="bio">—</span></p>
+      </div>
+
+      <a href="#capabilities" class="scroll-cue" aria-label="Scroll to content">
+        <span class="scroll-cue__label">Scroll</span>
+        <span class="scroll-cue__line" aria-hidden="true"></span>
+      </a>
+
+      <div class="hero__meta" aria-hidden="true">
+        <span class="hero__meta-line" data-bind="coordinates">—</span>
+        <span class="hero__meta-line"><span data-bind="tokyo-tz">TOKYO</span> — <time class="jst-clock" data-bind="clock">—</time> JST</span>
+      </div>
+    </section>
+
+    <!-- ====================== CAPABILITIES ====================== -->
+    <section id="capabilities" class="section section--capabilities">
+      <div class="section__inner">
+        <p class="eyebrow reveal-on-scroll" data-bind="capsEyebrow">01 — Capabilities</p>
+        <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="capsTitle">What I can be hired for.</span></span></h2>
+        <ul class="cap-grid" data-bind="capabilities"></ul>
+      </div>
+    </section>
+
+    <!-- ====================== ABOUT ====================== -->
+    <section id="about" class="section section--about">
+      <div class="section__inner about__inner">
+        <div class="about__media reveal-on-scroll" data-bind="about-media" aria-hidden="true"></div>
+        <div class="about__copy">
+          <p class="eyebrow reveal-on-scroll" data-bind="aboutEyebrow">02 — About</p>
+          <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="aboutTitle">A short story.</span></span></h2>
+          <p class="about__text reveal-on-scroll" data-bind="about">—</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== CONTACT ====================== -->
+    <section id="contact" class="section section--contact">
+      <div class="section__inner contact__inner">
+        <p class="eyebrow reveal-on-scroll" data-bind="contactEyebrow">03 — Contact</p>
+        <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="contactTitle">Let's build something quiet and loud.</span></span></h2>
+        <span class="pulse-beam" data-pulse>
+        <a class="cta" data-magnetic data-bind="cta-email" href="#">—</a>
+        <svg class="pulse-beam__svg" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pulse-grad-cta" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#ff003c" stop-opacity="0"/>
+              <stop offset="25%"  stop-color="#39ff14" stop-opacity="1"/>
+              <stop offset="55%"  stop-color="#00f0ff" stop-opacity="1"/>
+              <stop offset="80%"  stop-color="#ff14d4" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#ff003c" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="pulse-beam__base"  fill="none" stroke="rgba(57,255,20,0.22)" stroke-width="1"/>
+          <path class="pulse-beam__pulse" fill="none" stroke="url(#pulse-grad-cta)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+        <ul class="link-row reveal-on-scroll" data-bind="links"></ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__top">
+      <a class="site-footer__email" data-bind="footer-email" href="#">—</a>
+      <span class="pulse-beam" data-pulse>
+        <button class="back-to-top" type="button" aria-label="Back to top">
+          <span class="back-to-top__label" data-bind="backToTopLabel">Back to top</span>
+          <span class="back-to-top__arrow" aria-hidden="true">↑</span>
+        </button>
+        <svg class="pulse-beam__svg" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pulse-grad-btt" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#ff003c" stop-opacity="0"/>
+              <stop offset="25%"  stop-color="#39ff14" stop-opacity="1"/>
+              <stop offset="55%"  stop-color="#00f0ff" stop-opacity="1"/>
+              <stop offset="80%"  stop-color="#ff14d4" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#ff003c" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="pulse-beam__base"  fill="none" stroke="rgba(57,255,20,0.18)" stroke-width="1"/>
+          <path class="pulse-beam__pulse" fill="none" stroke="url(#pulse-grad-btt)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </div>
+    <div class="site-footer__wordmark" aria-hidden="true" data-bind="footer-wordmark">—</div>
+    <div class="site-footer__meta">
+      <p class="site-footer__credit" data-bind="credit">—</p>
+      <p class="site-footer__year">© <span data-bind="year">—</span></p>
+    </div>
+  </footer>
+
+  <!-- Motion libraries (CDN). All loaded with defer. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+  <!-- Site scripts -->
+  <script defer src="js/config.js?v=2026060902"></script>
+  <script defer src="js/visual.js?v=2026060902"></script>
+  <script defer src="js/main.js?v=2026060902"></script>
+</body>
+</html>
