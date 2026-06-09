@@ -75,15 +75,18 @@
     setBoundText("aboutTitle",     S.aboutTitle || "");
     setBoundText("contactEyebrow", S.contactEyebrow || "");
     setBoundText("contactTitle",   S.contactTitle || "");
+    setBoundText("contactIntro",   S.contactIntro || "");
     setBoundText("backToTopLabel", S.backToTopLabel || "");
     setBoundText("credit",         S.credit || "");
     setBoundText("langLabelEN",    S.langLabelEN || "EN");
     setBoundText("langLabelJP",    S.langLabelJP || "JP");
 
-    // Site mark (last word of name, max 12 chars)
-    if (markEl && S.name) {
-      const parts = String(S.name).trim().split(/\s+/);
-      markEl.textContent = (parts[parts.length - 1] || S.name).slice(0, 12);
+    // Site mark — explicit `siteMark` overrides; otherwise full name (max 24).
+    if (markEl) {
+      const mark = (S.siteMark && !String(S.siteMark).startsWith("TODO_"))
+        ? S.siteMark
+        : (S.name || "").slice(0, 24);
+      markEl.textContent = mark;
     }
 
     // Status
@@ -364,14 +367,16 @@
       try {
         clockEl.textContent = new Date().toLocaleTimeString("en-GB", {
           timeZone: "Asia/Tokyo",
-          hour12: false
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit"
         });
       } catch (_) {
-        clockEl.textContent = "--:--:--";
+        clockEl.textContent = "--:--";
       }
     };
     tick();
-    setInterval(tick, 1000);
+    setInterval(tick, 30000);
   }
 
   /* ============================================================

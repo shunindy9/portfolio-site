@@ -642,6 +642,13 @@ body.is-loading .mask__inner { transform: translateY(110%); }
 
 /* ---------- Contact ---------- */
 .contact__inner { text-align: left; }
+.contact__intro {
+  font-size: clamp(17px, 1.0vw + 10px, 19px);
+  line-height: 1.6;
+  color: var(--text);
+  max-width: var(--measure);
+  margin: 0 0 28px;
+}
 .cta {
   display: inline-flex;
   align-items: center;
