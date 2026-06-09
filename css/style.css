@@ -293,9 +293,7 @@ body.is-loading .mask__inner { transform: translateY(110%); }
   .site-nav .nav-cta { padding: 6px 10px; }
 }
 .site-nav a .nav-idx {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: var(--muted-2);
+  /* font-size, color, font-family owned by the board-text block (end of file). */
   transform: translateY(-3px);
   transition: color 240ms var(--ease-out);
 }
@@ -1444,24 +1442,34 @@ body.is-loud-beat .status__dot {
 :lang(en) .hero__meta-line {
   font-family: var(--font-board);
   color: var(--board-dim);
-  text-shadow: 0 0 4px var(--board-dim-glow);
+  text-shadow:
+    0 0 6px var(--board-dim-glow),
+    0 0 14px var(--board-dim-glow);
   letter-spacing: 0.14em;
   font-feature-settings: "tnum" 1;
   transition: color 280ms var(--ease-out), text-shadow 280ms var(--ease-out);
+  animation: board-idle-breathe 4200ms ease-in-out infinite;
+}
+
+/* Subtle "lights on" breathing — slow brightness wobble so the board
+ * feels alive even at idle, before the hover flicker fires. */
+@keyframes board-idle-breathe {
+  0%, 100% { opacity: 0.82; }
+  50%      { opacity: 1; }
 }
 
 /* Dot-matrix glyphs need room to draw. Each character is a 5×7 grid; below
  * ~14px the dots smear into illegibility. Bumping sizes per-target. */
-.nav-idx                  { font-size: 14px;  letter-spacing: 0.16em; }
-.cap-grid__num            { font-size: 20px;  letter-spacing: 0.18em; }
-.scroll-cue__label        { font-size: 13px;  letter-spacing: 0.18em; }
-.status__label            { font-size: 12px;  letter-spacing: 0.20em; }
-.back-to-top__label       { font-size: 13px;  letter-spacing: 0.16em; }
+.site-nav a .nav-idx      { font-size: 15px;  letter-spacing: 0.16em; }
+.cap-grid__num            { font-size: 22px;  letter-spacing: 0.18em; }
+.scroll-cue__label        { font-size: 14px;  letter-spacing: 0.20em; }
+.status__label            { font-size: 13px;  letter-spacing: 0.22em; }
+.back-to-top__label       { font-size: 14px;  letter-spacing: 0.18em; }
 .site-footer__credit,
 .site-footer__clock,
-.site-footer__year        { font-size: 13px;  letter-spacing: 0.14em; }
-:lang(en) .eyebrow        { font-size: 14px;  letter-spacing: 0.20em; }
-:lang(en) .hero__meta-line{ font-size: 13px;  letter-spacing: 0.16em; }
+.site-footer__year        { font-size: 13px;  letter-spacing: 0.16em; }
+:lang(en) .eyebrow        { font-size: 15px;  letter-spacing: 0.22em; }
+:lang(en) .hero__meta-line{ font-size: 14px;  letter-spacing: 0.18em; }
 
 /* JST clock — keep amber sodium glow as "always-on" platform sign.
  * Just opt in to the board font + tabular numerals. */
@@ -1469,6 +1477,7 @@ body.is-loud-beat .status__dot {
   font-family: var(--font-board);
   letter-spacing: 0.10em;
   font-feature-settings: "tnum" 1;
+  animation: board-idle-breathe 4200ms ease-in-out infinite;
 }
 
 /* RGB halo cycle — what the LED radiates once it locks on. */
@@ -1548,6 +1557,12 @@ body.is-loud-beat .status__dot {
   body.is-translating::after { animation: none !important; opacity: 0 !important; }
   .section__title::before,
   .cap-grid__item::after { animation: none !important; }
+
+  /* Board idle breathe is paused under reduced-motion. */
+  .nav-idx, .cap-grid__num, .scroll-cue__label, .status__label,
+  .back-to-top__label, .site-footer__credit, .site-footer__clock,
+  .site-footer__year, :lang(en) .eyebrow, :lang(en) .hero__meta-line,
+  .jst-clock { animation: none !important; opacity: 1 !important; }
 
   /* Board hover RGB cycle collapses to a single static neon glow. */
   .nav-idx:hover, .nav-idx:focus-visible,
