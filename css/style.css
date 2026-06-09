@@ -56,8 +56,8 @@
 
   /* LED-board font + idle (dim) palette. The "always-off" LED state. */
   --font-board:    "Teleindicadores", "Space Mono", "Noto Sans JP", ui-monospace, monospace;
-  --board-dim:      rgba(239, 230, 207, 0.34);   /* --text @ ~34% */
-  --board-dim-glow: rgba(239, 230, 207, 0.18);
+  --board-dim:      rgba(239, 230, 207, 0.62);   /* --text @ ~62% — visible LED-off */
+  --board-dim-glow: rgba(239, 230, 207, 0.28);
 
   --measure: 60ch;
   --pad-x: clamp(24px, 5.4vw, 64px);
@@ -96,8 +96,8 @@
   --accent-amber-glow: rgba(196, 120, 0, 0.40);
 
   /* Inked-board idle for light theme — dark glyphs on cream. */
-  --board-dim:      rgba(20, 17, 10, 0.46);
-  --board-dim-glow: rgba(20, 17, 10, 0.22);
+  --board-dim:      rgba(20, 17, 10, 0.72);
+  --board-dim-glow: rgba(20, 17, 10, 0.30);
 }
 :root[data-theme="light"] body { color-scheme: light; }
 
@@ -1450,7 +1450,20 @@ body.is-loud-beat .status__dot {
   transition: color 280ms var(--ease-out), text-shadow 280ms var(--ease-out);
 }
 
-/* JST clock — keep amber sodium glow as the "always-on" platform sign.
+/* Dot-matrix glyphs need room to draw. Each character is a 5×7 grid; below
+ * ~14px the dots smear into illegibility. Bumping sizes per-target. */
+.nav-idx                  { font-size: 14px;  letter-spacing: 0.16em; }
+.cap-grid__num            { font-size: 20px;  letter-spacing: 0.18em; }
+.scroll-cue__label        { font-size: 13px;  letter-spacing: 0.18em; }
+.status__label            { font-size: 12px;  letter-spacing: 0.20em; }
+.back-to-top__label       { font-size: 13px;  letter-spacing: 0.16em; }
+.site-footer__credit,
+.site-footer__clock,
+.site-footer__year        { font-size: 13px;  letter-spacing: 0.14em; }
+:lang(en) .eyebrow        { font-size: 14px;  letter-spacing: 0.20em; }
+:lang(en) .hero__meta-line{ font-size: 13px;  letter-spacing: 0.16em; }
+
+/* JST clock — keep amber sodium glow as "always-on" platform sign.
  * Just opt in to the board font + tabular numerals. */
 .jst-clock {
   font-family: var(--font-board);
@@ -1458,12 +1471,29 @@ body.is-loud-beat .status__dot {
   font-feature-settings: "tnum" 1;
 }
 
+/* RGB halo cycle — what the LED radiates once it locks on. */
 @keyframes board-rgb-cycle {
   0%   { text-shadow: 0 0 6px var(--neon-red),                0 0 14px rgba(255,   0,  60, 0.45); }
   25%  { text-shadow: 0 0 6px rgba( 57, 255,  20, 0.95),      0 0 14px var(--accent-glow-1); }
   50%  { text-shadow: 0 0 6px rgba(  0, 240, 255, 0.95),      0 0 14px var(--accent-glow-2); }
   75%  { text-shadow: 0 0 6px rgba(255,  20, 212, 0.95),      0 0 14px var(--accent-glow-3); }
   100% { text-shadow: 0 0 6px var(--neon-red),                0 0 14px rgba(255,   0,  60, 0.45); }
+}
+
+/* Ignite flicker — the rapid stutter as the LED struggles to light when
+ * your cursor lands on it. Plays once at hover entry, then the steady RGB
+ * cycle takes over. */
+@keyframes board-ignite-flicker {
+  0%   { opacity: 0.55; }
+  6%   { opacity: 1;    }
+  10%  { opacity: 0.35; }
+  16%  { opacity: 1;    }
+  22%  { opacity: 0.55; }
+  30%  { opacity: 1;    }
+  38%  { opacity: 0.7;  }
+  48%  { opacity: 1;    }
+  60%  { opacity: 0.85; }
+  100% { opacity: 1;    }
 }
 
 .nav-idx:hover, .nav-idx:focus-visible,
@@ -1482,15 +1512,19 @@ body.is-loud-beat .status__dot {
 :lang(en) .eyebrow:hover,
 :lang(en) .hero__meta:hover .hero__meta-line {
   color: var(--text);
-  animation: board-rgb-cycle 2400ms steps(16, jump-end) infinite;
+  animation:
+    board-ignite-flicker 520ms steps(18, jump-end) 1,
+    board-rgb-cycle 2400ms steps(16, jump-end) 520ms infinite;
 }
 
-/* JST clock — amber idle, RGB cycle on hover (overrides via specificity). */
+/* JST clock — amber idle, full flicker + RGB cycle on hover. */
 .hero__meta:hover .jst-clock,
 .site-footer__clock:hover .jst-clock,
 .jst-clock:hover {
   color: var(--text);
-  animation: board-rgb-cycle 2400ms steps(16, jump-end) infinite;
+  animation:
+    board-ignite-flicker 520ms steps(18, jump-end) 1,
+    board-rgb-cycle 2400ms steps(16, jump-end) 520ms infinite;
 }
 
 /* ---------- Reduced motion ---------- */
