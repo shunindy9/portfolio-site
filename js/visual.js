@@ -307,7 +307,19 @@
    * Frame loop
    * ---------------------------------------------------------------- */
   let t0 = 0;
+  let lastDraw = 0;
+  // Throttle to ~30fps. The shader is ambient background — eye reads it
+  // as smooth motion at half framerate, but compositor + GPU cost drops
+  // roughly 50%. Saves perceptibly on integrated GPUs / battery.
+  const FRAME_INTERVAL = 1000 / 30;
+  let isHidden = document.hidden;
+
   function frame(ts) {
+    if (!reduceMotion) requestAnimationFrame(frame);
+    if (isHidden) return;                        // pause when tab is in background
+    if (ts - lastDraw < FRAME_INTERVAL) return;  // 30fps gate
+    lastDraw = ts;
+
     if (!t0) t0 = ts;
     const time = ts - t0;
 
@@ -318,12 +330,15 @@
     gl.uniform1f(U.iTime, (time / 1000) * PARAMS.speed);
     gl.uniform2f(U.iMouse, current.x, current.y);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    if (!reduceMotion) requestAnimationFrame(frame);
   }
 
+  // Reset frame clock when tab returns so motion doesn't jump.
+  document.addEventListener("visibilitychange", () => {
+    isHidden = document.hidden;
+    if (!isHidden) { t0 = 0; lastDraw = 0; }
+  });
+
   if (reduceMotion) {
-    // One frame, no listeners.
     gl.uniform1f(U.iTime, 0);
     gl.uniform2f(U.iMouse, 0.5, 0.5);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
