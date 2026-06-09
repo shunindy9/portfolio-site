@@ -1,6 +1,22 @@
-/* Info page — minimal. Live JST clock, year, and a simple
- * IntersectionObserver for the .reveal fade-up. Nothing else. */
+/* Info page — minimal. Live JST clock, year, a simple IntersectionObserver
+ * for .reveal fade-up, and a 0.25x slow-down on the background video. */
 (function () {
+
+  // Background video — slow to 0.25x once it's playable. Set on both
+  // `canplay` (first load) and `loadedmetadata` (some browsers reset
+  // rate on metadata) so it sticks across loop boundaries.
+  var bgVideo = document.querySelector(".info-bg-video");
+  if (bgVideo) {
+    var SLOW = 0.25;
+    var applyRate = function () { bgVideo.playbackRate = SLOW; };
+    bgVideo.addEventListener("loadedmetadata", applyRate);
+    bgVideo.addEventListener("canplay", applyRate);
+    bgVideo.addEventListener("play", applyRate);
+    // Belt-and-braces: also set immediately in case the video is already
+    // ready when this script runs.
+    applyRate();
+  }
+
   // Live JST clock (HH:MM, ticks every 30s).
   var clockEls = document.querySelectorAll(".jst-clock");
   function tick() {
