@@ -173,7 +173,7 @@
   ];
   // data-bind keys that should NOT be glitched (numbers / static identifiers).
   const SKIP_BIND = new Set([
-    "name-mark", "clock", "year", "cta-email", "footer-email",
+    "name-mark", "clock", "clock-footer", "year", "cta-email", "footer-email",
     "footer-wordmark", "about-media", "status", "capabilities", "links",
     "langLabelEN", "langLabelJP" // toggle stays steady during transition
   ]);
@@ -361,19 +361,21 @@
   /* ============================================================
    * LIVE JST CLOCK
    * ============================================================ */
-  const clockEl = q('[data-bind="clock"]');
-  if (clockEl) {
+  const clockEls = qa('[data-bind="clock"], [data-bind="clock-footer"]');
+  if (clockEls.length) {
     const tick = () => {
+      let text;
       try {
-        clockEl.textContent = new Date().toLocaleTimeString("en-GB", {
+        text = new Date().toLocaleTimeString("en-GB", {
           timeZone: "Asia/Tokyo",
           hour12: false,
           hour: "2-digit",
           minute: "2-digit"
         });
       } catch (_) {
-        clockEl.textContent = "--:--";
+        text = "--:--";
       }
+      clockEls.forEach(el => { el.textContent = text; });
     };
     tick();
     setInterval(tick, 30000);
@@ -483,6 +485,10 @@
         opacity: 1, y: 0, duration: 1.0, ease: "expo.out", delay: 1.0
       });
     }
+
+    // One climactic beat right as the headline settles — grain swells,
+    // sodium-amber flashes on the status dot. ~1.7s after page load.
+    setTimeout(loudBeat, 1500);
   }
 
   /* ============================================================
@@ -596,6 +602,37 @@
       xTo(nx * w * amt);
       yTo(ny * h * amt * 0.6);
     }, { passive: true });
+  }
+
+  /* ============================================================
+   * PAGE GRAIN — body-level animated tape-noise overlay. Sits above
+   * content with pointer-events:none. CSS does the animation; this
+   * just inserts the element once.
+   * ============================================================ */
+  function mountPageGrain() {
+    if (document.querySelector(".page-grain")) return;
+    const g = document.createElement("div");
+    g.className = "page-grain";
+    g.setAttribute("aria-hidden", "true");
+    document.body.appendChild(g);
+  }
+
+  /* ============================================================
+   * LOUD BEAT — the one climactic flash per moment. Swells the grain
+   * + pulses the status dot in sodium amber for ~1.4s. Used by the
+   * hero entrance and by every diagonal panel arrival.
+   * ============================================================ */
+  let _loudBeatTimer = null;
+  function loudBeat() {
+    if (reduceMotion) return;
+    document.body.classList.remove("is-loud-beat");
+    // Force restart by reading offsetWidth between remove + add.
+    void document.body.offsetWidth;
+    document.body.classList.add("is-loud-beat");
+    clearTimeout(_loudBeatTimer);
+    _loudBeatTimer = setTimeout(() => {
+      document.body.classList.remove("is-loud-beat");
+    }, 1450);
   }
 
   /* ============================================================
@@ -789,6 +826,9 @@
     const id = _panelIds[idx];
     const root = document.getElementById(id);
     if (!root) return;
+
+    // Sodium amber loud-beat alongside the RGB strobe.
+    loudBeat();
 
     // RGB neon strobe — flashes the panel's heading + eyebrow in cycling neon
     // colors for ~2 seconds on arrival. Sits ON TOP of the existing scramble
@@ -1035,6 +1075,7 @@
     if (booted) return;
     booted = true;
     initLenis();
+    mountPageGrain();          // global tape-grain overlay (sits above content)
     initTextDisperse();        // char spans BEFORE entrance so they slide up together
     mountShaderBackground();   // permanent fullscreen shader backdrop (all modes)
     initDiagonalStage();       // BEFORE reveals + shader zoom so they pick up the timeline

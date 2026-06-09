@@ -28,6 +28,11 @@
   --accent-glow-2: rgba(  0, 240, 255, 0.45);   /* cyan  */
   --accent-glow-3: rgba(255,  20, 212, 0.35);   /* magenta */
 
+  /* Sodium-vapor amber — the "quiet and loud" signature. Tokyo streetlight
+   * at 3am. Used sparingly: JST clock, link hover, the single hero loud beat. */
+  --accent-amber:      #ffb01f;
+  --accent-amber-glow: rgba(255, 176, 31, 0.55);
+
   --font-display: "Archivo Black", "Helvetica Neue", Arial, sans-serif;
   --font-mono:    "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-body:    "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -64,6 +69,9 @@
   --accent-glow-1: rgba( 31, 168,   0, 0.55);
   --accent-glow-2: rgba(  0, 168, 184, 0.30);
   --accent-glow-3: rgba(192,  20, 148, 0.22);
+
+  --accent-amber:      #c47800;        /* deeper amber for AA on cream */
+  --accent-amber-glow: rgba(196, 120, 0, 0.40);
 }
 :root[data-theme="light"] body { color-scheme: light; }
 
@@ -465,7 +473,11 @@ body.is-loading .mask__inner { transform: translateY(110%); }
   z-index: 1;
 }
 .hero__meta-line { white-space: nowrap; }
-.jst-clock { font-variant-numeric: tabular-nums; color: var(--muted); }
+.jst-clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-amber);
+  text-shadow: 0 0 8px var(--accent-amber-glow);
+}
 @media (max-width: 640px) {
   .hero__meta {
     right: auto;
@@ -707,7 +719,10 @@ body.is-loading .mask__inner { transform: translateY(110%); }
   transition: transform 240ms var(--ease-out);
 }
 .link-row a:hover,
-.link-row a:focus-visible { color: var(--text); }
+.link-row a:focus-visible {
+  color: var(--accent-amber);
+  text-shadow: 0 0 12px var(--accent-amber-glow);
+}
 .link-row a:hover::after { transform: translateX(4px); }
 
 /* ---------- Footer ---------- */
@@ -782,6 +797,7 @@ body.is-loading .mask__inner { transform: translateY(110%); }
   border-top: 1px solid var(--hairline);
 }
 .site-footer__credit,
+.site-footer__clock,
 .site-footer__year {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -1304,7 +1320,56 @@ body.is-diagonal .section-pager { display: flex; }
 .reveal-on-scroll { opacity: 0; transform: translateY(20px); }
 .reveal-on-scroll.is-in { opacity: 1; transform: none; }
 
+/* ===========================================================================
+ * PAGE GRAIN — whole-page animated tape-noise overlay. ~6% opacity, sits on
+ * top of content but pointer-events:none. The "loud beat" body class briefly
+ * swells it to ~14% so the hero arrival and panel arrivals feel exhaled.
+ * ======================================================================== */
+.page-grain {
+  position: fixed;
+  inset: -10%;                     /* extra so animated translate hides edges */
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  background-size: 320px 320px;
+  animation: grain-shift 1100ms steps(8) infinite;
+  transition: opacity 700ms var(--ease-soft);
+}
+@keyframes grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-14px, 8px); }
+  50%  { transform: translate(10px, -12px); }
+  75%  { transform: translate(-8px, -6px); }
+  100% { transform: translate(0, 0); }
+}
+:root[data-theme="light"] .page-grain {
+  mix-blend-mode: multiply;
+  opacity: 0.05;
+}
+
+/* The single "loud" beat — grain swells, amber accent pulses on the status
+ * dot. Body class is added by JS after hero entrance + on diagonal panel
+ * arrival, then auto-removed after ~1.4s. */
+body.is-loud-beat .page-grain { opacity: 0.14; }
+body.is-loud-beat .status__dot {
+  animation: statusPulse 2200ms var(--ease-soft) infinite,
+             amberFlash 1400ms var(--ease-soft) 1;
+}
+@keyframes amberFlash {
+  0%   { box-shadow: 0 0 6px 0  var(--accent-amber-glow); }
+  20%  { box-shadow: 0 0 14px 8px var(--accent-amber-glow); background: var(--accent-amber); }
+  60%  { box-shadow: 0 0 8px 2px var(--accent-amber-glow); }
+  100% { box-shadow: 0 0 6px 0  rgba(57, 255, 20, 0); }
+}
+
 /* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .page-grain { animation: none; opacity: 0.04; }
+  body.is-loud-beat .page-grain { opacity: 0.04; }
+  body.is-loud-beat .status__dot { animation: statusPulse 2200ms var(--ease-soft) infinite; }
+}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal-on-scroll { opacity: 1 !important; transform: none !important; }
