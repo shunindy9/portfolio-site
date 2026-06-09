@@ -1402,6 +1402,62 @@ body.is-loud-beat .status__dot {
 }
 
 /* ===========================================================================
+ * HERO INFO BUTTON + CURSOR-ARROW CANVAS
+ * Vanilla port of the dynamic-hero.tsx component the user shared.
+ * The button sits below the bio; the canvas draws a dashed quadratic
+ * curve from the cursor to the button while you're inside the hero.
+ * ======================================================================== */
+.hero__cta {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: 1px solid rgba(239, 230, 207, 0.55);
+  border-radius: 14px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition:
+    border-color 280ms var(--ease-out),
+    color 280ms var(--ease-out),
+    background-color 280ms var(--ease-out),
+    text-shadow 280ms var(--ease-out);
+}
+.info-btn::after {
+  content: "→";
+  font-size: 14px;
+  transform: translateX(0);
+  transition: transform 280ms var(--ease-out);
+}
+.info-btn:hover,
+.info-btn:focus-visible {
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+  text-shadow: 0 0 8px var(--accent-amber-glow);
+  background: rgba(255, 176, 31, 0.05);
+}
+.info-btn:hover::after,
+.info-btn:focus-visible::after { transform: translateX(4px); }
+
+:root[data-theme="light"] .info-btn { border-color: rgba(20, 17, 10, 0.40); }
+:root[data-theme="light"] .info-btn:hover,
+:root[data-theme="light"] .info-btn:focus-visible { border-color: var(--accent-amber); }
+
+.hero-arrow-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;     /* above page-grain (5), below modals */
+}
+
+/* ===========================================================================
  * LED BOARD LAYER — Teleindicadores dot-matrix glyphs on the clock,
  * indices, meta tags, scroll cue, status, and footer monos. Idle state is
  * dimmed warm-off-white (or amber for the live clock); hover cycles a

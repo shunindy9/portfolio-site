@@ -76,6 +76,7 @@
     setBoundText("contactEyebrow", S.contactEyebrow || "");
     setBoundText("contactTitle",   S.contactTitle || "");
     setBoundText("contactIntro",   S.contactIntro || "");
+    setBoundText("infoBtnLabel",   S.infoBtnLabel || "View Info");
     setBoundText("backToTopLabel", S.backToTopLabel || "");
     setBoundText("credit",         S.credit || "");
     setBoundText("langLabelEN",    S.langLabelEN || "EN");
@@ -605,6 +606,98 @@
   }
 
   /* ============================================================
+   * INFO ARROW — vanilla port of the dynamic-hero.tsx canvas-arrow
+   * concept. A dashed quadratic curve is drawn from the cursor to the
+   * "View Info" button when the cursor is inside the hero viewport.
+   * Stops drawing entirely when the cursor leaves; throttled to 30fps;
+   * paused under reduced motion. Cost: ~0.1ms per frame.
+   * ============================================================ */
+  function initInfoArrow() {
+    if (reduceMotion) return;
+    const canvas = document.getElementById("hero-arrow-canvas");
+    const target = document.getElementById("info-btn");
+    if (!canvas || !target) return;
+
+    const ctx = canvas.getContext("2d");
+    const mouse = { x: null, y: null, active: false };
+    let raf = 0;
+    let lastDraw = 0;
+    const FRAME = 1000 / 30;
+    const hero = document.getElementById("hero");
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    function onMove(e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      // Only draw while the cursor is within the hero section.
+      mouse.active = hero && hero.contains(document.elementFromPoint(e.clientX, e.clientY));
+    }
+    function onLeave() { mouse.active = false; }
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", onLeave);
+
+    function draw(ts) {
+      raf = requestAnimationFrame(draw);
+      if (ts - lastDraw < FRAME) return;
+      lastDraw = ts;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!mouse.active || mouse.x === null) return;
+
+      const r = target.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const x0 = mouse.x;
+      const y0 = mouse.y;
+      const dist = Math.hypot(cx - x0, cy - y0);
+      // Skip when on top of the button — no curve needed.
+      if (dist < Math.max(r.width, r.height) / 2 + 8) return;
+
+      // Endpoint sits just outside the button rect on the cursor side.
+      const a = Math.atan2(cy - y0, cx - x0);
+      const x1 = cx - Math.cos(a) * (r.width / 2 + 12);
+      const y1 = cy - Math.sin(a) * (r.height / 2 + 12);
+
+      // Quadratic control point with mild vertical sag for a hand-drawn arc.
+      const midX = (x0 + x1) / 2;
+      const midY = (y0 + y1) / 2;
+      const offset = Math.min(180, dist * 0.4);
+      const t = Math.max(-1, Math.min(1, (y0 - y1) / 180));
+      const ctrlX = midX;
+      const ctrlY = midY + offset * t;
+
+      // Opacity ramps with distance so the arrow only appears at range.
+      const opacity = Math.min(0.9, (dist - Math.max(r.width, r.height) / 2) / 420);
+
+      ctx.strokeStyle = "rgba(239, 230, 207, " + opacity + ")";  // warm off-white
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([9, 5]);
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo(ctrlX, ctrlY, x1, y1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Arrowhead at the endpoint.
+      const headAngle = Math.atan2(y1 - ctrlY, x1 - ctrlX);
+      const headLen = 10;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 - headLen * Math.cos(headAngle - Math.PI / 6), y1 - headLen * Math.sin(headAngle - Math.PI / 6));
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 - headLen * Math.cos(headAngle + Math.PI / 6), y1 - headLen * Math.sin(headAngle + Math.PI / 6));
+      ctx.stroke();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  /* ============================================================
    * PAGE GRAIN — body-level animated tape-noise overlay. Sits above
    * content with pointer-events:none. CSS does the animation; this
    * just inserts the element once.
@@ -1075,6 +1168,7 @@
     if (booted) return;
     booted = true;
     initLenis();
+    initInfoArrow();           // canvas dashed arrow from cursor → Info button
     mountPageGrain();          // global tape-grain overlay (sits above content)
     initTextDisperse();        // char spans BEFORE entrance so they slide up together
     mountShaderBackground();   // permanent fullscreen shader backdrop (all modes)

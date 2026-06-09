@@ -61,7 +61,10 @@ window.SITE_CONFIG = {
 
   // Contact
   email:        "shun.indy@gmail.com",
+  phone:        "08033557778",         // displayed as 080-3355-7778, tel: link
+  phoneDisplay: "080-3355-7778",
   ctaLabel:     "Start a project",
+  infoBtnLabel: "View Info",
   contactIntro:
     "Have a project, a release, or a brand that should feel like something? I take on a few commissions and collaborations at a time. Tell me what you're making.",
 
@@ -150,6 +153,7 @@ window.SITE_CONFIG = {
     ],
 
     ctaLabel:     "プロジェクトを始める",
+    infoBtnLabel: "プロフィール",
     contactIntro: "心を動かしたいプロジェクト、リリース、ブランド ─ お持ちですか。受けられる数を絞って、丁寧にご一緒しています。いま手がけているものを、聞かせてください。",
 
     capsEyebrow:    "01 — 提供スキル",

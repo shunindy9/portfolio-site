@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061005" />
+  <link rel="stylesheet" href="css/style.css?v=2026061006" />
 
   <!-- Apply theme BEFORE first paint so there's no dark→light flash on load.
        Order: explicit user choice (localStorage) → OS preference → dark. -->
@@ -113,7 +113,19 @@
         <h1 class="hero__name mask"><span class="mask__inner" data-bind="name">—</span></h1>
         <p class="hero__role mask"><span class="mask__inner" data-bind="roleLabel">—</span></p>
         <p class="hero__bio mask"><span class="mask__inner" data-bind="bio">—</span></p>
+
+        <!-- Info button — links to /info.html. The canvas overlay below this
+             section draws a dashed arrow from the cursor to this button. -->
+        <div class="hero__cta">
+          <a href="info.html" class="info-btn" id="info-btn" data-bind="infoBtnLabel">View Info</a>
+        </div>
       </div>
+
+      <!-- Cursor-to-button arrow overlay (vanilla port of the dynamic-hero
+           React component the user shared). Fixed full-viewport canvas,
+           pointer-events: none, draws a dashed quadratic curve from the
+           mouse to the #info-btn rect when within range. -->
+      <canvas id="hero-arrow-canvas" class="hero-arrow-canvas" aria-hidden="true"></canvas>
 
       <a href="#capabilities" class="scroll-cue" aria-label="Scroll to content">
         <span class="scroll-cue__label">Scroll</span>
@@ -212,8 +224,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 
   <!-- Site scripts -->
-  <script defer src="js/config.js?v=2026061005"></script>
-  <script defer src="js/visual.js?v=2026061005"></script>
-  <script defer src="js/main.js?v=2026061005"></script>
+  <script defer src="js/config.js?v=2026061006"></script>
+  <script defer src="js/visual.js?v=2026061006"></script>
+  <script defer src="js/main.js?v=2026061006"></script>
 </body>
 </html>

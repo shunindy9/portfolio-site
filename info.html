@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>Shunsuke Otsuki — Info</title>
+  <meta name="description" content="Personal information — Shunsuke Otsuki, Tokyo-based creative director, designer, technologist." />
+
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0b07'/><circle cx='16' cy='16' r='6' fill='%23ffb01f'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css?v=2026061006" />
+  <link rel="stylesheet" href="css/info.css?v=2026061006" />
+
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("portfolio-theme");
+        var theme = saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</head>
+<body class="info-page">
+
+  <a class="skip-link" href="#info-main">Skip to content</a>
+
+  <header class="info-header">
+    <a href="index.html" class="info-back" aria-label="Back to portfolio">
+      <span aria-hidden="true">←</span>
+      <span>Portfolio</span>
+    </a>
+    <span class="info-meta"><span class="info-meta__city">TOKYO</span> · <time class="info-meta__clock jst-clock">—</time> JST</span>
+  </header>
+
+  <main id="info-main" class="info-main">
+
+    <section class="info-hero">
+      <p class="info-eyebrow">Personal Information</p>
+      <h1 class="info-name">Shunsuke Otsuki</h1>
+      <p class="info-tagline">Creative Director · Designer · Technologist — Tokyo.</p>
+    </section>
+
+    <section class="info-block info-block--contact reveal">
+      <p class="info-block__label">Contact</p>
+      <ul class="info-list">
+        <li>
+          <span class="info-list__key">Email</span>
+          <a class="info-list__val info-list__val--link" href="mailto:shun.indy@gmail.com">shun.indy@gmail.com</a>
+        </li>
+        <li>
+          <span class="info-list__key">Phone</span>
+          <a class="info-list__val info-list__val--link" href="tel:+818033557778">080-3355-7778</a>
+        </li>
+        <li>
+          <span class="info-list__key">Based in</span>
+          <span class="info-list__val">Tokyo, Japan</span>
+        </li>
+        <li>
+          <span class="info-list__key">Languages</span>
+          <span class="info-list__val">English · 日本語</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">Practice</p>
+      <p class="info-prose">
+        I direct, design, and build for music, culture, and brands that want to be felt.
+        Cinematic and restrained by default — built to land loud when it counts.
+        Most work lives between the precision of design and the warmth of analog sound.
+      </p>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">Services</p>
+      <ul class="info-services">
+        <li>Creative direction · content</li>
+        <li>Interactive · web design</li>
+        <li>Brand · art direction</li>
+        <li>Music · sound design</li>
+      </ul>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">Availability</p>
+      <p class="info-prose">Available for new commissions and collaborations — 2026.</p>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">Elsewhere</p>
+      <ul class="info-links">
+        <li><a href="https://shunindy9.github.io/lemon-king-library" target="_blank" rel="noopener noreferrer">GitHub / Portfolio</a></li>
+        <li><a href="#" data-todo>Instagram</a></li>
+        <li><a href="#" data-todo>Bandcamp</a></li>
+        <li><a href="#" data-todo>YouTube</a></li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="info-footer">
+    <p>© <span id="info-year">—</span> Shunsuke Otsuki — Designed &amp; built in Tokyo.</p>
+  </footer>
+
+  <script defer src="js/info.js?v=2026061006"></script>
+</body>
+</html>
