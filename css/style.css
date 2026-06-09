@@ -3,6 +3,22 @@
  * Restraint is the flex. Warm, cinematic, quiet — alive in one place.
  * ======================================================================== */
 
+/* ---------- Self-hosted display face ---------- */
+/* Teleindicadores 1 — Spanish regional-train LED destination-board font
+ * (5x7 dot matrix, public domain). Used only on the "board" UI layer:
+ * clock, section indices, TOKYO/JST tags, scroll cue, footer monos.
+ * `unicode-range` restricts it to Latin-1 so per-glyph fallback to Noto
+ * Sans JP fires automatically on any Japanese character. */
+@font-face {
+  font-family: "Teleindicadores";
+  src: url("../assets/fonts/Teleindicadores1.woff2") format("woff2"),
+       url("../assets/fonts/Teleindicadores1.ttf")   format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF;
+}
+
 /* ---------- Tokens ---------- */
 :root {
   --bg:        #0d0b07;
@@ -37,6 +53,11 @@
   --font-mono:    "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-body:    "DM Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-jp:      "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+
+  /* LED-board font + idle (dim) palette. The "always-off" LED state. */
+  --font-board:    "Teleindicadores", "Space Mono", "Noto Sans JP", ui-monospace, monospace;
+  --board-dim:      rgba(239, 230, 207, 0.34);   /* --text @ ~34% */
+  --board-dim-glow: rgba(239, 230, 207, 0.18);
 
   --measure: 60ch;
   --pad-x: clamp(24px, 5.4vw, 64px);
@@ -73,6 +94,10 @@
 
   --accent-amber:      #c47800;        /* deeper amber for AA on cream */
   --accent-amber-glow: rgba(196, 120, 0, 0.40);
+
+  /* Inked-board idle for light theme — dark glyphs on cream. */
+  --board-dim:      rgba(20, 17, 10, 0.46);
+  --board-dim-glow: rgba(20, 17, 10, 0.22);
 }
 :root[data-theme="light"] body { color-scheme: light; }
 
@@ -288,7 +313,7 @@ body.is-loading .mask__inner { transform: translateY(110%); }
 .site-nav a:not(.nav-cta):focus-visible::after { transform: scaleX(1); }
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--text); }
-.site-nav a:hover .nav-idx { color: var(--muted); }
+/* nav-idx hover color owned by the board-text RGB cycle (see end of file). */
 .site-nav .nav-cta {
   color: var(--text);
   padding: 8px 14px 8px 14px;
@@ -589,7 +614,7 @@ body.is-loading .mask__inner { transform: translateY(110%); }
   transition: color 320ms var(--ease-out), transform 420ms var(--ease-soft);
 }
 .cap-grid__item:hover .cap-grid__num {
-  color: var(--accent);
+  /* color owned by the board-text RGB cycle (see end of file). */
   transform: translateY(-2px);
 }
 .cap-grid__row {
@@ -1398,6 +1423,76 @@ body.is-loud-beat .status__dot {
   100% { box-shadow: 0 0 6px 0  rgba(57, 255, 20, 0); }
 }
 
+/* ===========================================================================
+ * LED BOARD LAYER — Teleindicadores dot-matrix glyphs on the clock,
+ * indices, meta tags, scroll cue, status, and footer monos. Idle state is
+ * dimmed warm-off-white (or amber for the live clock); hover cycles a
+ * brand-RGB neon glow via text-shadow only — the dot-matrix glyphs each
+ * get their own per-dot halo, which reads as a real LED bloom.
+ * Latin-only via @font-face unicode-range; JP falls back to Noto Sans JP.
+ * ======================================================================== */
+
+.nav-idx,
+.cap-grid__num,
+.scroll-cue__label,
+.status__label,
+.back-to-top__label,
+.site-footer__credit,
+.site-footer__clock,
+.site-footer__year,
+:lang(en) .eyebrow,
+:lang(en) .hero__meta-line {
+  font-family: var(--font-board);
+  color: var(--board-dim);
+  text-shadow: 0 0 4px var(--board-dim-glow);
+  letter-spacing: 0.14em;
+  font-feature-settings: "tnum" 1;
+  transition: color 280ms var(--ease-out), text-shadow 280ms var(--ease-out);
+}
+
+/* JST clock — keep amber sodium glow as the "always-on" platform sign.
+ * Just opt in to the board font + tabular numerals. */
+.jst-clock {
+  font-family: var(--font-board);
+  letter-spacing: 0.10em;
+  font-feature-settings: "tnum" 1;
+}
+
+@keyframes board-rgb-cycle {
+  0%   { text-shadow: 0 0 6px var(--neon-red),                0 0 14px rgba(255,   0,  60, 0.45); }
+  25%  { text-shadow: 0 0 6px rgba( 57, 255,  20, 0.95),      0 0 14px var(--accent-glow-1); }
+  50%  { text-shadow: 0 0 6px rgba(  0, 240, 255, 0.95),      0 0 14px var(--accent-glow-2); }
+  75%  { text-shadow: 0 0 6px rgba(255,  20, 212, 0.95),      0 0 14px var(--accent-glow-3); }
+  100% { text-shadow: 0 0 6px var(--neon-red),                0 0 14px rgba(255,   0,  60, 0.45); }
+}
+
+.nav-idx:hover, .nav-idx:focus-visible,
+.site-nav a:hover .nav-idx,
+.site-nav a:focus-visible .nav-idx,
+.cap-grid__item:hover .cap-grid__num,
+.cap-grid__item:focus-within .cap-grid__num,
+.scroll-cue:hover .scroll-cue__label,
+.scroll-cue:focus-visible .scroll-cue__label,
+.status:hover .status__label,
+.back-to-top:hover .back-to-top__label,
+.back-to-top:focus-visible .back-to-top__label,
+.site-footer__credit:hover,
+.site-footer__clock:hover,
+.site-footer__year:hover,
+:lang(en) .eyebrow:hover,
+:lang(en) .hero__meta:hover .hero__meta-line {
+  color: var(--text);
+  animation: board-rgb-cycle 2400ms steps(16, jump-end) infinite;
+}
+
+/* JST clock — amber idle, RGB cycle on hover (overrides via specificity). */
+.hero__meta:hover .jst-clock,
+.site-footer__clock:hover .jst-clock,
+.jst-clock:hover {
+  color: var(--text);
+  animation: board-rgb-cycle 2400ms steps(16, jump-end) infinite;
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .page-grain { animation: none; opacity: 0.04; }
@@ -1419,4 +1514,26 @@ body.is-loud-beat .status__dot {
   body.is-translating::after { animation: none !important; opacity: 0 !important; }
   .section__title::before,
   .cap-grid__item::after { animation: none !important; }
+
+  /* Board hover RGB cycle collapses to a single static neon glow. */
+  .nav-idx:hover, .nav-idx:focus-visible,
+  .site-nav a:hover .nav-idx,
+  .site-nav a:focus-visible .nav-idx,
+  .cap-grid__item:hover .cap-grid__num,
+  .cap-grid__item:focus-within .cap-grid__num,
+  .scroll-cue:hover .scroll-cue__label,
+  .scroll-cue:focus-visible .scroll-cue__label,
+  .status:hover .status__label,
+  .back-to-top:hover .back-to-top__label,
+  .back-to-top:focus-visible .back-to-top__label,
+  .site-footer__credit:hover, .site-footer__clock:hover, .site-footer__year:hover,
+  :lang(en) .eyebrow:hover,
+  :lang(en) .hero__meta:hover .hero__meta-line,
+  .hero__meta:hover .jst-clock,
+  .site-footer__clock:hover .jst-clock,
+  .jst-clock:hover {
+    animation: none !important;
+    color: var(--text);
+    text-shadow: 0 0 6px var(--accent-glow-1), 0 0 12px var(--accent-glow-2);
+  }
 }
