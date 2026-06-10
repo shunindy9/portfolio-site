@@ -242,10 +242,8 @@ body.is-pulsing .info-bg-video {
   font-family: "DSEG7 Classic", var(--font-mono);
 }
 
-.info-list__val {
-  font-family: "DSEG14 Classic", var(--font-mono);
-  letter-spacing: 0.04em;
-}
+/* Values stay in the body face for readability — DSEG14's segmented
+ * glyphs garble long alphanumeric like email addresses. */
 .info-tagline {
   font-family: var(--font-body);
   font-size: clamp(16px, 1vw + 12px, 19px);
@@ -564,4 +562,74 @@ body.is-pulsing .info-bg-video {
   .info-hero { padding: 30px 0 60px; }
   .info-list li { grid-template-columns: 110px 1fr; gap: 16px; }
   .info-list__val { font-size: 16px; }
+}
+
+/* ===========================================================================
+ * TEXT AURA — every text node on the info page gets a soft white glow
+ * with subtle red/cyan chromatic edges. Static (no animation = zero
+ * per-frame cost) but visually "flowing" because of the stacked colored
+ * shadows. Excludes .info-name (it has its own VHS glitch treatment) and
+ * the CTA labels (they have their own amber hover glow).
+ * Light theme uses an inverted, dimmer ink-aura since white on cream
+ * disappears.
+ * ======================================================================== */
+.info-main p,
+.info-main h2,
+.info-main h3,
+.info-main span:not(.info-cta__icon):not(.info-cta__label),
+.info-main a:not(.info-cta),
+.info-main li,
+.info-back,
+.info-meta,
+.info-footer p {
+  text-shadow:
+     0 0 6px  rgba(255, 255, 255, 0.30),
+     0 0 14px rgba(255, 255, 255, 0.12),
+    -0.5px 0 0 rgba(255,  60,  90, 0.35),
+     0.5px 0 0 rgba( 80, 230, 255, 0.35);
+}
+
+/* Bold the chromatic edges slightly more on the section labels — those
+ * dot-matrix forms benefit from a stronger RGB tint. */
+.info-block__label {
+  text-shadow:
+     0 0 8px  rgba(255, 255, 255, 0.40),
+    -0.75px 0 0 rgba(255,  60,  90, 0.55),
+     0.75px 0 0 rgba( 80, 230, 255, 0.55);
+}
+
+/* Light theme — flip to a dim warm-ink glow so the chromatic edges
+ * still read against the cream background. */
+:root[data-theme="light"] .info-main p,
+:root[data-theme="light"] .info-main h2,
+:root[data-theme="light"] .info-main h3,
+:root[data-theme="light"] .info-main span:not(.info-cta__icon):not(.info-cta__label),
+:root[data-theme="light"] .info-main a:not(.info-cta),
+:root[data-theme="light"] .info-main li,
+:root[data-theme="light"] .info-back,
+:root[data-theme="light"] .info-meta,
+:root[data-theme="light"] .info-footer p {
+  text-shadow:
+     0 0 5px  rgba(255, 255, 255, 0.45),
+    -0.5px 0 0 rgba(196,   0,  60, 0.30),
+     0.5px 0 0 rgba(  0, 120, 168, 0.30);
+}
+:root[data-theme="light"] .info-block__label {
+  text-shadow:
+     0 0 6px  rgba(255, 255, 255, 0.55),
+    -0.75px 0 0 rgba(196,   0,  60, 0.50),
+     0.75px 0 0 rgba(  0, 120, 168, 0.50);
+}
+
+/* Hover states keep their amber glow (defined earlier) but stack the
+ * chromatic edges so the white aura doesn't disappear during hover. */
+.info-list__val--link:hover,
+.info-list__val--link:focus-visible,
+.info-links li a:hover,
+.info-links li a:focus-visible {
+  text-shadow:
+     0 0 10px var(--accent-amber-glow),
+     0 0 18px var(--accent-amber-glow),
+    -0.5px 0 0 rgba(255,  60,  90, 0.35),
+     0.5px 0 0 rgba( 80, 230, 255, 0.35);
 }
