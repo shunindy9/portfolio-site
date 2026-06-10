@@ -41,7 +41,17 @@
 /* Looping video background + dark scrim. The video is muted and
  * playsinline so it autoplays on every modern browser including iOS.
  * The scrim drops legibility of the foreground content. Static SVG
- * grain ::before sits on top of both for the analog texture. */
+ * grain ::before sits on top of both for the analog texture.
+ *
+ * Interactive filter chain (driven by CSS variables set from info.js):
+ *  - sepia(0.55) colorizes the grayscale-ish source so hue-rotate
+ *    has something to rotate (rotating a pure grayscale does nothing).
+ *  - hue-rotate(--bg-hue) scrubbed by scroll progress through the
+ *    Dark Side of the Moon prism (red → orange → yellow → green →
+ *    blue → violet → back).
+ *  - saturate(--bg-sat) and contrast(--bg-con) react to mouse
+ *    proximity for a "fingers in the soap-film" interactive feel.
+ *  - The video's intrinsic 60fps motion is untouched. */
 .info-bg-video {
   position: fixed;
   inset: 0;
@@ -50,17 +60,83 @@
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
-  /* Slight cinematic desaturation so it sits behind text without
-   * fighting the foreground palette. */
-  filter: saturate(0.85) contrast(1.05);
+  filter:
+    sepia(1)
+    hue-rotate(var(--bg-hue, 0deg))
+    saturate(var(--bg-sat, 2.2))
+    contrast(var(--bg-con, 1.15))
+    brightness(1.05);
+  transition:
+    filter 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: filter;
 }
 .info-bg-scrim {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* Lighter scrim so the rainbow filter shines through. Heavier at the
+   * bottom where the text density is higher and needs legibility. */
   background:
-    linear-gradient(180deg, rgba(13,11,7,0.55) 0%, rgba(13,11,7,0.78) 60%, rgba(13,11,7,0.92) 100%);
+    linear-gradient(180deg, rgba(13,11,7,0.25) 0%, rgba(13,11,7,0.55) 60%, rgba(13,11,7,0.78) 100%);
+}
+
+/* Cursor lens — a colored radial gradient that follows the mouse and
+ * blends into the video with color-dodge. Pulls saturated hue out of the
+ * sepia-tinted source wherever the cursor is. Pure CSS-variable driven;
+ * the JS only flips two custom properties on pointer move. */
+.info-bg-lens {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 360px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    hsla(var(--lens-hue, 320), 90%, 60%, 0.55) 0%,
+    hsla(var(--lens-hue, 320), 90%, 50%, 0.20) 30%,
+    transparent 65%
+  );
+  mix-blend-mode: color-dodge;
+  transition: background 220ms ease-out;
+}
+
+/* Flash from below — fires when the user reaches the end of the scroll.
+ * Fixed pseudo, opacity scrubbed from 0 to 1 over the last 8% of the
+ * page scroll. Looks like ground-level light bleeding up through the
+ * content. */
+.info-flash {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 80vh;
+  z-index: 3;
+  pointer-events: none;
+  /* Bigger, brighter flare. Cone narrows from below, peaking at the
+   * bottom edge with near-white core that grades through warm amber. */
+  background:
+    radial-gradient(
+      130% 110% at 50% 120%,
+      rgba(255, 255, 240, 1) 0%,
+      rgba(255, 230, 170, 0.85) 18%,
+      rgba(255, 180, 100, 0.55) 35%,
+      rgba(255, 110, 50, 0.25) 55%,
+      transparent 75%
+    );
+  opacity: var(--flash-opacity, 0);
+  transition: opacity 480ms cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: screen;
+}
+
+/* Click pulse — boost saturation briefly, like a flashbulb pop. The
+ * .is-pulsing body class is toggled by JS for ~400ms after each click. */
+body.is-pulsing .info-bg-video {
+  filter:
+    sepia(1)
+    hue-rotate(var(--bg-hue, 0deg))
+    saturate(3.4)
+    contrast(1.35)
+    brightness(1.20);
 }
 :root[data-theme="light"] .info-bg-scrim {
   background:
