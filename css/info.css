@@ -19,16 +19,31 @@
  * lots of vertical air, name large in the middle, monospace meta, simple
  * fade-up reveal on scroll. Same shader background as the main site,
  * scoped via .info-page so this file is fully isolated.
+ *
+ * Typography is "futuristic, analog yellow" — every text node is
+ * colored on the warm phosphor-yellow spectrum and wears a yellow
+ * CRT halo. Tokens below pin those colors so the rest of the file can
+ * reference them without repeating long rgba() chains.
  * ======================================================================== */
 
 .info-page {
+  /* Analog phosphor-yellow palette — CRT amber, mid-warm, slightly
+   * green-leaning so it reads "instrument cluster" not "fast-food
+   * sign". Used by the text-aura block at the bottom of this file. */
+  --analog-yellow:        #ffd24a;
+  --analog-yellow-hot:    #fff1a8;
+  --analog-yellow-deep:   #f0a814;
+  --analog-yellow-glow:   rgba(255, 210, 74, 0.55);
+  --analog-yellow-glow-2: rgba(255, 210, 74, 0.22);
+  --analog-yellow-edge:   rgba(240, 168,  20, 0.65);
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   /* Body transparent so the video shows through. The html element still
    * paints --bg as the bottom layer in case the video fails to load. */
   background: transparent;
-  color: var(--text);
+  color: var(--analog-yellow);
 }
 
 /* Looping video background + dark scrim. The video is muted and
@@ -168,29 +183,27 @@ body.is-pulsing .info-bg-video {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-mono);
+  font-family: "DSEG14 Classic", var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.20em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--analog-yellow);
   transition: color 240ms var(--ease-out);
 }
 .info-back:hover,
 .info-back:focus-visible {
-  color: var(--accent-amber);
-  text-shadow: 0 0 8px var(--accent-amber-glow);
+  color: var(--analog-yellow-hot);
+  text-shadow: 0 0 8px var(--analog-yellow-glow);
 }
 .info-meta {
-  font-family: var(--font-board);
+  font-family: "DSEG14 Classic", var(--font-board);
   font-size: 13px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--board-dim);
-  text-shadow: 0 0 6px var(--board-dim-glow);
+  color: var(--analog-yellow);
 }
 .info-meta__clock {
-  color: var(--accent-amber);
-  text-shadow: 0 0 8px var(--accent-amber-glow);
+  color: var(--analog-yellow-hot);
 }
 
 /* ----- Main content ----- */
@@ -210,26 +223,25 @@ body.is-pulsing .info-bg-video {
   padding: 60px 0 100px;
 }
 .info-eyebrow {
-  font-family: var(--font-mono);
+  font-family: "DSEG14 Classic", var(--font-mono);
   font-size: 14px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--analog-yellow);
   margin: 0 0 38px;
 }
 .info-name {
   /* DSEG14 Classic — 14-segment display, readable digital-clock glyphs.
    * Static (no VHS animation) so the user can always read the name.
-   * Subtle white halo provided by the text-aura block at the bottom of
-   * this file — keeps the digital-clock feel without ever fracturing
-   * the word. */
+   * Analog-yellow phosphor halo provided by the text-aura block at the
+   * bottom of this file — instrument-cluster look, no fracturing. */
   font-family: "DSEG14 Classic", var(--font-display);
   font-weight: 700;
   font-size: clamp(48px, 7.5vw, 104px);
   letter-spacing: 0.005em;
   line-height: 1.05;
   margin: 0 0 30px;
-  color: var(--text);
+  color: var(--analog-yellow);
 }
 
 .info-block__label {
@@ -241,7 +253,7 @@ body.is-pulsing .info-bg-video {
 .info-tagline {
   font-family: var(--font-body);
   font-size: clamp(19px, 1.2vw + 13px, 24px);
-  color: var(--muted);
+  color: var(--analog-yellow);
   margin: 0 auto;
   max-width: 34ch;
   line-height: 1.55;
@@ -335,13 +347,14 @@ body.is-pulsing .info-bg-video {
   font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--muted-2);
+  color: var(--analog-yellow-deep);
   margin: 0 0 22px;
 }
 .info-prose {
+  font-family: var(--font-body);
   font-size: clamp(18px, 1vw + 13px, 21px);
   line-height: 1.65;
-  color: var(--text);
+  color: var(--analog-yellow);
   margin: 0;
   max-width: 56ch;
 }
@@ -362,15 +375,16 @@ body.is-pulsing .info-bg-video {
   align-items: baseline;
 }
 .info-list__key {
-  font-family: var(--font-mono);
+  font-family: "DSEG14 Classic", var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--analog-yellow-deep);
 }
 .info-list__val {
+  font-family: var(--font-body);
   font-size: 20px;
-  color: var(--text);
+  color: var(--analog-yellow);
 }
 .info-list__val--link {
   position: relative;
@@ -387,8 +401,8 @@ body.is-pulsing .info-bg-video {
 }
 .info-list__val--link:hover,
 .info-list__val--link:focus-visible {
-  color: var(--accent-amber);
-  text-shadow: 0 0 8px var(--accent-amber-glow);
+  color: var(--analog-yellow-hot);
+  text-shadow: 0 0 8px var(--analog-yellow-glow), 0 0 18px var(--analog-yellow-glow-2);
 }
 .info-list__val--link:hover::after,
 .info-list__val--link:focus-visible::after { right: 0; }
@@ -404,19 +418,21 @@ body.is-pulsing .info-bg-video {
   gap: 12px;
 }
 .info-services li {
+  font-family: var(--font-body);
   font-size: 20px;
   line-height: 1.5;
-  color: var(--text);
+  color: var(--analog-yellow);
 }
 .info-services li::before {
   content: "—";
   margin-right: 12px;
-  color: var(--muted-2);
+  color: var(--analog-yellow-deep);
 }
 .info-links li a {
   display: inline-block;
+  font-family: var(--font-body);
   font-size: 20px;
-  color: var(--text);
+  color: var(--analog-yellow);
   position: relative;
   padding-right: 18px;
   transition: color 240ms var(--ease-out), text-shadow 240ms var(--ease-out);
@@ -427,13 +443,13 @@ body.is-pulsing .info-bg-video {
   right: 0;
   top: 0;
   font-size: 13px;
-  color: var(--muted-2);
+  color: var(--analog-yellow-deep);
   transition: transform 240ms var(--ease-out);
 }
 .info-links li a:hover,
 .info-links li a:focus-visible {
-  color: var(--accent-amber);
-  text-shadow: 0 0 8px var(--accent-amber-glow);
+  color: var(--analog-yellow-hot);
+  text-shadow: 0 0 8px var(--analog-yellow-glow), 0 0 18px var(--analog-yellow-glow-2);
 }
 .info-links li a:hover::after,
 .info-links li a:focus-visible::after { transform: translate(2px, -2px); }
@@ -444,11 +460,11 @@ body.is-pulsing .info-bg-video {
   position: relative;
   z-index: 2;
   padding: 36px var(--pad-x);
-  font-family: var(--font-mono);
+  font-family: "DSEG14 Classic", var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--muted-2);
+  color: var(--analog-yellow-deep);
   text-align: center;
 }
 
@@ -478,15 +494,19 @@ body.is-pulsing .info-bg-video {
 }
 
 /* ===========================================================================
- * TEXT AURA — every text node on the info page gets a soft white glow
- * with subtle red/cyan chromatic edges. Static (no animation = zero
- * per-frame cost) but visually "flowing" because of the stacked colored
- * shadows. Excludes .info-name (it has its own VHS glitch treatment) and
- * the CTA labels (they have their own amber hover glow).
- * Light theme uses an inverted, dimmer ink-aura since white on cream
- * disappears.
+ * TEXT AURA — every text node on the info page wears an analog-yellow
+ * phosphor halo. Three-layer shadow stack: a hot inner core, a wider
+ * warm bleed, and a deep amber edge for chromatic depth. Static (no
+ * animation = zero per-frame cost) but visually "burning" because of
+ * the stacked warm shadows. CRT instrument-cluster look — futuristic
+ * but analog.
+ *
+ * Excludes the CTA labels (they have their own amber background-driven
+ * hover glow). Light theme dims the bleed and warms the edge so the
+ * yellow still reads against the cream background.
  * ======================================================================== */
 .info-main p,
+.info-main h1,
 .info-main h2,
 .info-main h3,
 .info-main span:not(.info-cta__icon):not(.info-cta__label),
@@ -494,55 +514,54 @@ body.is-pulsing .info-bg-video {
 .info-main li,
 .info-back,
 .info-meta,
+.info-meta__clock,
 .info-footer p {
   text-shadow:
-     0 0 6px  rgba(255, 255, 255, 0.30),
-     0 0 14px rgba(255, 255, 255, 0.12),
-    -0.5px 0 0 rgba(255,  60,  90, 0.35),
-     0.5px 0 0 rgba( 80, 230, 255, 0.35);
+     0 0 4px  var(--analog-yellow-glow),
+     0 0 10px var(--analog-yellow-glow-2),
+     0 0 22px var(--analog-yellow-glow-2),
+     0 0 1px  var(--analog-yellow-edge);
 }
 
-/* Bold the chromatic edges slightly more on the section labels — those
- * dot-matrix forms benefit from a stronger RGB tint. */
+/* Name carries a heavier phosphor burn — it's the focal anchor on the
+ * page and the DSEG14 segments take the glow beautifully. */
+.info-name {
+  text-shadow:
+     0 0 6px  var(--analog-yellow-glow),
+     0 0 18px var(--analog-yellow-glow),
+     0 0 38px var(--analog-yellow-glow-2),
+     0 0 1px  var(--analog-yellow-edge);
+}
+
+/* Section labels — slightly deeper edge tint so the segmented label
+ * faces stand apart from the values they introduce. */
 .info-block__label {
   text-shadow:
-     0 0 8px  rgba(255, 255, 255, 0.40),
-    -0.75px 0 0 rgba(255,  60,  90, 0.55),
-     0.75px 0 0 rgba( 80, 230, 255, 0.55);
+     0 0 6px  var(--analog-yellow-glow),
+     0 0 14px var(--analog-yellow-glow-2),
+     0 0 1px  var(--analog-yellow-edge);
 }
 
-/* Light theme — flip to a dim warm-ink glow so the chromatic edges
- * still read against the cream background. */
-:root[data-theme="light"] .info-main p,
-:root[data-theme="light"] .info-main h2,
-:root[data-theme="light"] .info-main h3,
-:root[data-theme="light"] .info-main span:not(.info-cta__icon):not(.info-cta__label),
-:root[data-theme="light"] .info-main a:not(.info-cta),
-:root[data-theme="light"] .info-main li,
-:root[data-theme="light"] .info-back,
-:root[data-theme="light"] .info-meta,
-:root[data-theme="light"] .info-footer p {
-  text-shadow:
-     0 0 5px  rgba(255, 255, 255, 0.45),
-    -0.5px 0 0 rgba(196,   0,  60, 0.30),
-     0.5px 0 0 rgba(  0, 120, 168, 0.30);
-}
-:root[data-theme="light"] .info-block__label {
-  text-shadow:
-     0 0 6px  rgba(255, 255, 255, 0.55),
-    -0.75px 0 0 rgba(196,   0,  60, 0.50),
-     0.75px 0 0 rgba(  0, 120, 168, 0.50);
+/* Light theme — flip the bleed darker so the yellow still has presence
+ * against cream. The edge tint stays warm to preserve the analog feel. */
+:root[data-theme="light"] .info-page {
+  --analog-yellow:        #b8770a;
+  --analog-yellow-hot:    #d09010;
+  --analog-yellow-deep:   #8a560a;
+  --analog-yellow-glow:   rgba(184, 119, 10, 0.32);
+  --analog-yellow-glow-2: rgba(184, 119, 10, 0.14);
+  --analog-yellow-edge:   rgba(140,  90,  6, 0.45);
 }
 
-/* Hover states keep their amber glow (defined earlier) but stack the
- * chromatic edges so the white aura doesn't disappear during hover. */
+/* Hover states stack the phosphor glow brighter — same color family,
+ * just a hotter core so the link feels lit-up rather than swapped. */
 .info-list__val--link:hover,
 .info-list__val--link:focus-visible,
 .info-links li a:hover,
 .info-links li a:focus-visible {
   text-shadow:
-     0 0 10px var(--accent-amber-glow),
-     0 0 18px var(--accent-amber-glow),
-    -0.5px 0 0 rgba(255,  60,  90, 0.35),
-     0.5px 0 0 rgba( 80, 230, 255, 0.35);
+     0 0 8px  var(--analog-yellow-glow),
+     0 0 18px var(--analog-yellow-glow),
+     0 0 34px var(--analog-yellow-glow-2),
+     0 0 1px  var(--analog-yellow-edge);
 }
