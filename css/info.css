@@ -59,9 +59,9 @@
     saturate(var(--bg-sat, 2.2))
     contrast(var(--bg-con, 1.15))
     brightness(1.05);
-  transition:
-    filter 320ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: filter;
+  /* No transition — JS rAF-coalesces variable updates already; the
+   * transition was adding 320ms of GPU re-interpolation between every
+   * rAF tick, causing the info-page lag the user reported. */
 }
 .info-bg-scrim {
   position: fixed;
@@ -90,7 +90,7 @@
     transparent 65%
   );
   mix-blend-mode: color-dodge;
-  transition: background 220ms ease-out;
+  /* No transition on background — same reason as the video filter. */
 }
 
 /* Flash from below — fires when the user reaches the end of the scroll.
@@ -211,26 +211,25 @@ body.is-pulsing .info-bg-video {
 }
 .info-eyebrow {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 32px;
+  margin: 0 0 38px;
 }
 .info-name {
-  /* DSEG14 Classic — 14-segment display has the diagonal segments DSEG7
-   * lacks, so letters like S, K, R, N render as readable shapes rather
-   * than approximations. Same digital-clock aesthetic, far less
-   * 'encrypted' feel. */
+  /* DSEG14 Classic — 14-segment display, readable digital-clock glyphs.
+   * Static (no VHS animation) so the user can always read the name.
+   * Subtle white halo provided by the text-aura block at the bottom of
+   * this file — keeps the digital-clock feel without ever fracturing
+   * the word. */
   font-family: "DSEG14 Classic", var(--font-display);
   font-weight: 700;
-  font-size: clamp(34px, 5.5vw, 78px);  /* DSEG14 runs even wider than 7 */
+  font-size: clamp(48px, 7.5vw, 104px);
   letter-spacing: 0.005em;
   line-height: 1.05;
-  margin: 0 0 22px;
+  margin: 0 0 30px;
   color: var(--text);
-  position: relative;
-  display: inline-block;
 }
 
 .info-block__label {
@@ -241,11 +240,11 @@ body.is-pulsing .info-bg-video {
  * glyphs garble long alphanumeric like email addresses. */
 .info-tagline {
   font-family: var(--font-body);
-  font-size: clamp(16px, 1vw + 12px, 19px);
+  font-size: clamp(19px, 1.2vw + 13px, 24px);
   color: var(--muted);
   margin: 0 auto;
-  max-width: 32ch;
-  line-height: 1.5;
+  max-width: 34ch;
+  line-height: 1.55;
 }
 
 /* ----- Direct-action CTA row ----- */
@@ -321,85 +320,10 @@ body.is-pulsing .info-bg-video {
   .info-cta:hover, .info-cta:focus-visible { transform: none; }
 }
 
-/* ===========================================================================
- * VHS GLITCH on .info-name — recurring, not constant. The animation runs
- * for 7s total but the actual visual disturbance only happens between 93%
- * and 96% of the loop. The other 94% is calm. This is exactly how a VCR
- * tape error reads: clean, sudden fracture, resolve. RGB neon halo is
- * baked into the same keyframe via stacked colored text-shadow blurs —
- * red/cyan chromatic split + green/magenta glow at the same time.
- * ======================================================================== */
-.info-name {
-  animation: vhs-glitch-pulse 7s linear infinite;
-  will-change: text-shadow, transform;
-}
-.info-name::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  /* Wider gap between stripes so the underlying glyph stays legible
-   * during the flash. Was 2px-on / 1px-off, now 3px-on / 4px-off. */
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0) 0px,
-    rgba(255, 255, 255, 0) 4px,
-    rgba(255, 255, 255, 0.14) 4px,
-    rgba(255, 255, 255, 0.14) 5px
-  );
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  opacity: 0;
-  animation: vhs-scan-flash 7s linear infinite;
-}
-
-@keyframes vhs-glitch-pulse {
-  /* Calm 96% of the time — the text reads clean. The glitch window
-   * was widened from 3% to 4% but each beat is gentler: 1-2px offsets
-   * instead of 3-4px, so the word stays readable through the event. */
-  0%, 95.99% {
-    text-shadow: none;
-    transform: translate(0, 0);
-  }
-  /* Beat 1 — gentle chromatic split */
-  96%, 96.49% {
-    text-shadow:
-      -1.5px 0 0 rgba(255,   0,  60, 0.85),
-       1.5px 0 0 rgba(  0, 240, 255, 0.85),
-       0 0 10px rgba(255,  20, 212, 0.30);
-    transform: translate(1px, 0);
-  }
-  /* Beat 2 — opposite shift */
-  96.5%, 97.49% {
-    text-shadow:
-       2px 0 0 rgba(  0, 240, 255, 0.85),
-      -2px 0 0 rgba(255,   0,  60, 0.85),
-       0 0 12px rgba(  0, 240, 255, 0.40);
-    transform: translate(-1px, 1px);
-  }
-  /* Beat 3 — settle */
-  97.5%, 98.49% {
-    text-shadow:
-      -1px 0 0 rgba(255,   0,  60, 0.65),
-       1px 0 0 rgba(  0, 240, 255, 0.65);
-    transform: translate(0, 0);
-  }
-  /* Hold the settle. */
-  98.5%, 100% {
-    text-shadow: none;
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes vhs-scan-flash {
-  0%, 95.99% { opacity: 0; }
-  96%, 98.49% { opacity: 0.28; }   /* lower opacity = less stripe interference */
-  98.5%, 100% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .info-name,
-  .info-name::after { animation: none; }
-}
+/* VHS glitch pulse on .info-name was removed per user feedback. The
+ * recurring fracture made the name unreadable when it fired. The
+ * digital-clock aesthetic now comes entirely from the static DSEG14
+ * glyphs + the white-RGB text aura. */
 
 /* ----- Info blocks ----- */
 .info-block {
@@ -408,14 +332,14 @@ body.is-pulsing .info-bg-video {
 }
 .info-block__label {
   font-family: "DSEG14 Classic", var(--font-mono);
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted-2);
-  margin: 0 0 18px;
+  margin: 0 0 22px;
 }
 .info-prose {
-  font-size: clamp(16px, 1vw + 11px, 18px);
+  font-size: clamp(18px, 1vw + 13px, 21px);
   line-height: 1.65;
   color: var(--text);
   margin: 0;
@@ -439,13 +363,13 @@ body.is-pulsing .info-bg-video {
 }
 .info-list__key {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
 }
 .info-list__val {
-  font-size: 17px;
+  font-size: 20px;
   color: var(--text);
 }
 .info-list__val--link {
@@ -480,7 +404,8 @@ body.is-pulsing .info-bg-video {
   gap: 12px;
 }
 .info-services li {
-  font-size: 17px;
+  font-size: 20px;
+  line-height: 1.5;
   color: var(--text);
 }
 .info-services li::before {
@@ -490,7 +415,7 @@ body.is-pulsing .info-bg-video {
 }
 .info-links li a {
   display: inline-block;
-  font-size: 17px;
+  font-size: 20px;
   color: var(--text);
   position: relative;
   padding-right: 18px;

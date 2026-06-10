@@ -389,26 +389,35 @@
   function initLenis() {
     if (reduceMotion || !window.Lenis) return;
     lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      // Snappier easing — exponential out instead of quartic — for a
+      // controlled-but-responsive feel. Shorter duration so scroll
+      // settles fast and doesn't fight ScrollTrigger snap on the
+      // diagonal stage.
+      duration: 0.8,
+      easing: (t) => 1 - Math.pow(2, -10 * t),   // expo.out
       smoothWheel: true,
       smoothTouch: false,
-      // Halve the wheel delta so a single mouse tick / trackpad swipe
-      // doesn't blow past the next panel. The user wants a more
-      // controlled scroll where each tick advances a smaller distance.
-      wheelMultiplier: 0.5,
-      touchMultiplier: 1.4
+      // 0.8 is the sweet spot — restrains over-scroll without feeling
+      // sluggish. (Was 0.5, which felt locked.) Trackpad users get
+      // natural inertia from the OS layer; we only need to tame the
+      // wheel-spike that fires several deltas per tick on a mouse.
+      wheelMultiplier: 0.8,
+      touchMultiplier: 1.6
     });
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-
+    // Lenis driven by gsap.ticker only — avoid double-RAF that was
+    // making scroll feel like it was fighting itself (each tick got
+    // integrated twice: once by the self-scheduled raf above, once by
+    // gsap.ticker, producing compounding inertia against snap).
     if (window.gsap && window.ScrollTrigger) {
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
+    } else {
+      // Fallback when GSAP missed the deferred load (rare).
+      (function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      })();
     }
 
     // Re-route in-page anchor links: panel anchors → diagonal stage progress
@@ -845,12 +854,15 @@
       }
     });
 
-    // Keep smoothing alive while scroll is idle (so it converges to snap point).
+    // Keep smoothing alive while scroll is idle (so it converges to snap
+    // point). Skip when the tab is hidden — no point ticking — and use
+    // a looser convergence threshold (1e-3) + faster lerp (0.25) so the
+    // ticker stops paying compositor cost the moment we're at snap.
     gsap.ticker.add(() => {
-      if (!_diagonalST) return;
+      if (document.hidden || !_diagonalST) return;
       const target = _diagonalST.progress;
-      if (Math.abs(target - smoothedProgress) < 1e-4) return;
-      smoothedProgress += (target - smoothedProgress) * 0.18;
+      if (Math.abs(target - smoothedProgress) < 1e-3) return;
+      smoothedProgress += (target - smoothedProgress) * 0.25;
       const p = smoothedProgress;
       const seg = Math.min(2, Math.floor(p * 3));
       const t   = (p * 3) - seg;
