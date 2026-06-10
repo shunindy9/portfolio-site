@@ -1,16 +1,9 @@
 /* ===========================================================================
- * Self-hosted DSEG digital-clock faces (SIL Open Font License).
- * Source: github.com/keshikan/DSEG v0.46. Latin-only via unicode-range so
- * JP characters fall through the cascade to Noto Sans JP. */
-@font-face {
-  font-family: "DSEG7 Classic";
-  src: url("../assets/fonts/DSEG7Classic-Bold.woff2") format("woff2"),
-       url("../assets/fonts/DSEG7Classic-Bold.ttf")   format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0020-007E, U+00A0-00FF;
-}
+ * Self-hosted DSEG14 Classic Bold digital-clock face (SIL OFL).
+ * Source: github.com/keshikan/DSEG v0.46. Only DSEG14 is shipped —
+ * DSEG7 was tried first but its 7-segment letters read as encrypted
+ * for non-numeric text. Latin-only via unicode-range so JP characters
+ * fall through to Noto Sans JP. */
 @font-face {
   font-family: "DSEG14 Classic";
   src: url("../assets/fonts/DSEG14Classic-Bold.woff2") format("woff2"),

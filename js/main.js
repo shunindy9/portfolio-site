@@ -389,10 +389,15 @@
   function initLenis() {
     if (reduceMotion || !window.Lenis) return;
     lenis = new Lenis({
-      duration: 1.15,
+      duration: 1.2,
       easing: (t) => 1 - Math.pow(1 - t, 4),
       smoothWheel: true,
-      smoothTouch: false
+      smoothTouch: false,
+      // Halve the wheel delta so a single mouse tick / trackpad swipe
+      // doesn't blow past the next panel. The user wants a more
+      // controlled scroll where each tick advances a smaller distance.
+      wheelMultiplier: 0.5,
+      touchMultiplier: 1.4
     });
     function raf(time) {
       lenis.raf(time);

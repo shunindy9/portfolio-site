@@ -1151,15 +1151,10 @@ body.is-diagonal .section-pager { display: flex; }
 }
 
 /* ---------- RGB neon shimmer rings (section titles + capability cards) ----- */
-@property --shimmer-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes rgb-shimmer-rotate {
-  from { --shimmer-angle: 0deg; }
-  to   { --shimmer-angle: 360deg; }
-}
+/* The conic-gradient + @property --shimmer-angle animation was retired
+ * during the perf audit — replaced with a static linear gradient on
+ * .section__title::before and .cap-grid__item::after. Both --shimmer-angle
+ * and @keyframes rgb-shimmer-rotate removed as dead code. */
 
 /* Make existing rules ring-friendly. */
 .section__title { position: relative; isolation: isolate; padding: 6px 14px; margin-left: -14px; }
@@ -1490,10 +1485,8 @@ body.is-loud-beat .status__dot {
 
 /* Subtle "lights on" breathing — slow brightness wobble so the board
  * feels alive even at idle, before the hover flicker fires. */
-@keyframes board-idle-breathe {
-  0%, 100% { opacity: 0.82; }
-  50%      { opacity: 1; }
-}
+/* @keyframes board-idle-breathe removed — retired during the perf audit
+ * (was hammering the compositor on 10+ LED elements simultaneously). */
 
 /* Dot-matrix glyphs need room to draw. Each character is a 5×7 grid; below
  * ~14px the dots smear into illegibility. Bumping sizes per-target. */
