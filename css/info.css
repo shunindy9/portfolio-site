@@ -1,4 +1,27 @@
 /* ===========================================================================
+ * Self-hosted DSEG digital-clock faces (SIL Open Font License).
+ * Source: github.com/keshikan/DSEG v0.46. Latin-only via unicode-range so
+ * JP characters fall through the cascade to Noto Sans JP. */
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("../assets/fonts/DSEG7Classic-Bold.woff2") format("woff2"),
+       url("../assets/fonts/DSEG7Classic-Bold.ttf")   format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF;
+}
+@font-face {
+  font-family: "DSEG14 Classic";
+  src: url("../assets/fonts/DSEG14Classic-Bold.woff2") format("woff2"),
+       url("../assets/fonts/DSEG14Classic-Bold.ttf")   format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF;
+}
+
+/* ===========================================================================
  * INFO PAGE — minimal, polished. Borrows tokens from style.css. The vibe:
  * lots of vertical air, name large in the middle, monospace meta, simple
  * fade-up reveal on scroll. Same shader background as the main site,
@@ -126,12 +149,26 @@
   margin: 0 0 32px;
 }
 .info-name {
-  font-family: var(--font-display);
-  font-size: clamp(40px, 7vw, 96px);
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-family: "DSEG7 Classic", var(--font-display);
+  font-weight: 700;
+  font-size: clamp(36px, 6vw, 84px);  /* slightly smaller — DSEG runs wide */
+  letter-spacing: 0.01em;             /* DSEG already widely tracked; less */
+  line-height: 1.05;
   margin: 0 0 22px;
   color: var(--text);
+  /* Position relative so the VHS chromatic pseudos can absolutely-pin
+   * over the live glyphs. */
+  position: relative;
+  display: inline-block;
+}
+
+.info-block__label {
+  font-family: "DSEG7 Classic", var(--font-mono);
+}
+
+.info-list__val {
+  font-family: "DSEG14 Classic", var(--font-mono);
+  letter-spacing: 0.04em;
 }
 .info-tagline {
   font-family: var(--font-body);
@@ -215,15 +252,102 @@
   .info-cta:hover, .info-cta:focus-visible { transform: none; }
 }
 
+/* ===========================================================================
+ * VHS GLITCH on .info-name — recurring, not constant. The animation runs
+ * for 7s total but the actual visual disturbance only happens between 93%
+ * and 96% of the loop. The other 94% is calm. This is exactly how a VCR
+ * tape error reads: clean, sudden fracture, resolve. RGB neon halo is
+ * baked into the same keyframe via stacked colored text-shadow blurs —
+ * red/cyan chromatic split + green/magenta glow at the same time.
+ * ======================================================================== */
+.info-name {
+  animation: vhs-glitch-pulse 7s linear infinite;
+  will-change: text-shadow, transform;
+}
+.info-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0) 0px,
+    rgba(255, 255, 255, 0) 2px,
+    rgba(255, 255, 255, 0.22) 2px,
+    rgba(255, 255, 255, 0.22) 3px
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity: 0;
+  animation: vhs-scan-flash 7s linear infinite;
+}
+
+@keyframes vhs-glitch-pulse {
+  /* Calm 93% of the time — no shadow, no transform. */
+  0%, 92.99% {
+    text-shadow: none;
+    transform: translate(0, 0);
+  }
+  /* Beat 1 — chromatic split + cyan/magenta neon halo, hard shake left */
+  93%, 93.49% {
+    text-shadow:
+      -3px 0 0 #ff003c,
+       3px 0 0 #00f0ff,
+       0 0 14px rgba( 57, 255,  20, 0.55),
+       0 0 26px rgba(255,  20, 212, 0.40);
+    transform: translate(2px, -1px);
+  }
+  /* Beat 2 — flip channel sides, shake right */
+  93.5%, 94.49% {
+    text-shadow:
+       4px 1px 0 #00f0ff,
+      -4px 0  0 #ff003c,
+       0 0 18px rgba(  0, 240, 255, 0.65),
+       0 0 30px rgba(255,  20, 212, 0.45);
+    transform: translate(-3px, 1px);
+  }
+  /* Beat 3 — tighter split, halo settling */
+  94.5%, 95.49% {
+    text-shadow:
+      -2px 0 0 #ff003c,
+       2px 0 0 #00f0ff,
+       0 0 12px rgba(255,  20, 212, 0.50);
+    transform: translate(1px, 0);
+  }
+  /* Beat 4 — final flicker, vertical shake */
+  95.5%, 96% {
+    text-shadow:
+       3px 1px 0 #ff003c,
+      -3px -1px 0 #00f0ff,
+       0 0 22px rgba( 57, 255,  20, 0.55);
+    transform: translate(-1px, 2px);
+  }
+  /* Settle. */
+  96.5%, 100% {
+    text-shadow: none;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes vhs-scan-flash {
+  0%, 92.99% { opacity: 0; }
+  93%, 96%   { opacity: 0.55; }
+  96.5%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-name,
+  .info-name::after { animation: none; }
+}
+
 /* ----- Info blocks ----- */
 .info-block {
   border-top: 1px solid var(--hairline);
   padding: 32px 0 28px;
 }
 .info-block__label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.28em;
+  font-family: "DSEG7 Classic", var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;        /* DSEG already wide — less tracking */
   text-transform: uppercase;
   color: var(--muted-2);
   margin: 0 0 18px;
