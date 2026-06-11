@@ -4,27 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
-  <title>Portfolio</title>
-  <meta name="description" content="Interactive designer & creative technologist based in Tokyo." />
+  <title>Shunsuke Otsuki — Creative Director · Designer · Technologist</title>
+  <meta name="description" content="Shunsuke Otsuki — Tokyo-based creative director, designer, technologist. Design, motion, and sound, made to feel analog." />
 
   <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0b07'/><circle cx='16' cy='16' r='6' fill='%23ffb01f'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061018" />
+  <link rel="stylesheet" href="css/style.css?v=2026061201" />
+  <link rel="stylesheet" href="css/info.css?v=2026061201" />
 
-  <!-- Apply theme BEFORE first paint so there's no dark→light flash on load.
-       Order: explicit user choice (localStorage) → OS preference → dark. -->
   <script>
     (function () {
       try {
         var saved = localStorage.getItem("portfolio-theme");
-        var theme = saved
-          || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        var theme = saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
         document.documentElement.setAttribute("data-theme", theme);
       } catch (e) {
         document.documentElement.setAttribute("data-theme", "dark");
@@ -32,44 +27,28 @@
     })();
   </script>
 </head>
-<body class="is-loading">
+<body class="info-page">
 
-  <a class="skip-link" href="#capabilities">Skip to content</a>
+  <!-- Looping background video. Muted + playsinline + autoplay so iOS
+       Safari runs it. preload=metadata so the page paints fast and the
+       video streams in. Dark/light scrim is applied via CSS overlay. -->
+  <video class="info-bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+    <source src="assets/video/hj-bg.mp4?v=20260610b" type="video/mp4" />
+  </video>
+  <div class="info-bg-scrim" aria-hidden="true"></div>
+  <div class="info-bg-lens"  aria-hidden="true"></div>
+  <div class="info-flash"    aria-hidden="true"></div>
 
-  <aside class="section-pager" aria-label="Section indicator">
-    <button class="section-pager__dot is-active" type="button" data-section="0" aria-label="Hero"></button>
-    <button class="section-pager__dot"           type="button" data-section="1" aria-label="Capabilities"></button>
-    <button class="section-pager__dot"           type="button" data-section="2" aria-label="About"></button>
-    <button class="section-pager__dot"           type="button" data-section="3" aria-label="Contact"></button>
-  </aside>
+  <a class="skip-link" href="#info-main">Skip to content</a>
 
-  <header class="site-header" aria-label="Primary">
-    <div class="site-header__left">
-      <a href="#hero" class="site-mark" data-bind="name-mark" aria-label="Home">—</a>
-      <span class="status" data-bind="status" hidden>
-        <span class="status__dot" aria-hidden="true"></span>
-        <span class="status__label">Available for work</span>
-      </span>
-    </div>
-    <nav class="site-nav" aria-label="Section navigation">
-      <a href="#capabilities" data-bind-attr="capsLink"><span class="nav-idx" aria-hidden="true">01</span><span class="nav-label" data-bind="navCaps">Capabilities</span></a>
-      <a href="#about"><span class="nav-idx" aria-hidden="true">02</span><span class="nav-label" data-bind="navAbout">About</span></a>
-      <a href="#contact" class="nav-cta"><span class="nav-label" data-bind="navContact">Contact</span></a>
-      <div class="theme-toggle" role="group" aria-label="Toggle dark / light theme" data-state="dark">
-        <span class="theme-toggle__indicator" aria-hidden="true"></span>
-        <button type="button" class="theme-toggle__btn" data-theme="light" aria-label="Light theme" aria-pressed="false">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-          </svg>
-        </button>
-        <button type="button" class="theme-toggle__btn" data-theme="dark" aria-label="Dark theme" aria-pressed="true">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-      </div>
-      <div class="lang-toggle" role="group" data-bind-attr="langAria" aria-label="Switch site language" data-state="en">
+  <header class="info-header">
+    <a href="work.html" class="info-back" aria-label="View work">
+      <span data-bind="infoWorkLabel">View Work</span>
+      <span aria-hidden="true">→</span>
+    </a>
+    <div class="info-header__right">
+      <span class="info-meta"><span class="info-meta__city">TOKYO</span> · <time class="info-meta__clock jst-clock">—</time> JST</span>
+      <div class="lang-toggle" role="group" aria-label="Switch site language" data-state="en">
         <span class="lang-toggle__indicator" aria-hidden="true"></span>
         <button type="button" class="lang-toggle__btn" data-lang="ja" aria-pressed="false">
           <span data-bind="langLabelJP">JP</span>
@@ -78,7 +57,7 @@
           <span data-bind="langLabelEN">EN</span>
         </button>
       </div>
-    </nav>
+    </div>
   </header>
 
   <!-- Liquid SVG filter for the language toggle indicator (hidden, definition only). -->
@@ -93,137 +72,206 @@
     </defs>
   </svg>
 
-  <main id="main">
+  <main id="info-main" class="info-main">
 
-    <!-- ====================== HERO ====================== -->
-    <section id="hero" class="hero" aria-label="Introduction">
-      <!--
-        Hero background visual. SWAPPABLE.
-        Replace the <canvas id="hero-canvas"> with a TouchDesigner <video> loop
-        or a WebGL/shader element later — nothing else on the page depends on it.
-      -->
-      <div class="hero__visual" aria-hidden="true">
-        <canvas id="hero-canvas"></canvas>
-      </div>
+    <section class="info-hero">
+      <p class="info-eyebrow" data-bind="infoEyebrow">Personal Information</p>
+      <h1 class="info-name">Shunsuke Otsuki</h1>
+      <p class="info-tagline" data-bind="infoTagline">Creative Director · Designer · Technologist — Tokyo.</p>
 
-      <div class="hero__inner" data-parallax="0.04">
-        <p class="eyebrow mask"><span class="mask__inner" data-bind="eyebrow">—</span></p>
-        <h1 class="hero__name mask"><span class="mask__inner" data-bind="name">—</span></h1>
-        <p class="hero__role mask"><span class="mask__inner" data-bind="roleLabel">—</span></p>
-        <p class="hero__bio mask"><span class="mask__inner" data-bind="bio">—</span></p>
-
-        <!-- Info button — links to /info.html. The canvas overlay below this
-             section draws a dashed arrow from the cursor to this button. -->
-        <div class="hero__cta">
-          <a href="info.html" class="info-btn" id="info-btn" data-bind="infoBtnLabel">View Info</a>
-        </div>
-      </div>
-
-      <!-- Cursor-to-button arrow overlay (vanilla port of the dynamic-hero
-           React component the user shared). Fixed full-viewport canvas,
-           pointer-events: none, draws a dashed quadratic curve from the
-           mouse to the #info-btn rect when within range. -->
-      <canvas id="hero-arrow-canvas" class="hero-arrow-canvas" aria-hidden="true"></canvas>
-
-      <a href="#capabilities" class="scroll-cue" aria-label="Scroll to content">
-        <span class="scroll-cue__label">Scroll</span>
-        <span class="scroll-cue__line" aria-hidden="true"></span>
-      </a>
-
-      <div class="hero__meta" aria-hidden="true">
-        <span class="hero__meta-line" data-bind="coordinates">—</span>
-        <span class="hero__meta-line"><span data-bind="tokyo-tz">TOKYO</span> — <time class="jst-clock" data-bind="clock">—</time> JST</span>
+      <!-- Direct-action CTAs. mailto: opens default mail app, tel: opens
+           the phone dialer on iOS/Android and FaceTime/Handoff on Mac. -->
+      <div class="info-cta-row">
+        <a class="info-cta info-cta--primary" href="mailto:shun.indy@gmail.com">
+          <span class="info-cta__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m3 7 9 6 9-6"/>
+            </svg>
+          </span>
+          <span class="info-cta__label" data-bind="infoEmailCta">Email Me</span>
+        </a>
+        <a class="info-cta info-cta--secondary" href="tel:+818033557778">
+          <span class="info-cta__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <span class="info-cta__label" data-bind="infoCallCta">Call Me</span>
+        </a>
       </div>
     </section>
 
-    <!-- ====================== CAPABILITIES ====================== -->
-    <section id="capabilities" class="section section--capabilities">
-      <div class="section__inner">
-        <p class="eyebrow reveal-on-scroll" data-bind="capsEyebrow">01 — Capabilities</p>
-        <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="capsTitle">What I can be hired for.</span></span></h2>
-        <ul class="cap-grid" data-bind="capabilities"></ul>
-      </div>
-    </section>
-
-    <!-- ====================== ABOUT ====================== -->
-    <section id="about" class="section section--about">
-      <div class="section__inner about__inner">
-        <div class="about__media reveal-on-scroll" data-bind="about-media" aria-hidden="true"></div>
-        <div class="about__copy">
-          <p class="eyebrow reveal-on-scroll" data-bind="aboutEyebrow">02 — About</p>
-          <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="aboutTitle">A short story.</span></span></h2>
-          <p class="about__text reveal-on-scroll" data-bind="about">—</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ====================== CONTACT ====================== -->
-    <section id="contact" class="section section--contact">
-      <div class="section__inner contact__inner">
-        <p class="eyebrow reveal-on-scroll" data-bind="contactEyebrow">03 — Contact</p>
-        <h2 class="section__title reveal-on-scroll"><span class="mask"><span class="mask__inner" data-bind="contactTitle">Let's build something quiet and loud.</span></span></h2>
-        <p class="contact__intro reveal-on-scroll" data-bind="contactIntro">—</p>
-        <span class="pulse-beam" data-pulse>
-        <a class="cta" data-magnetic data-bind="cta-email" href="#">—</a>
-        <svg class="pulse-beam__svg" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="pulse-grad-cta" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#ff003c" stop-opacity="0"/>
-              <stop offset="25%"  stop-color="#39ff14" stop-opacity="1"/>
-              <stop offset="55%"  stop-color="#00f0ff" stop-opacity="1"/>
-              <stop offset="80%"  stop-color="#ff14d4" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#ff003c" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path class="pulse-beam__base"  fill="none" stroke="rgba(57,255,20,0.22)" stroke-width="1"/>
-          <path class="pulse-beam__pulse" fill="none" stroke="url(#pulse-grad-cta)" stroke-width="2" stroke-linecap="round"/>
+    <section class="info-block info-block--contact reveal">
+      <p class="info-block__label">
+        <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle class="draw" style="--d:0" cx="12" cy="12" r="9" pathLength="1"/>
+          <ellipse class="draw" style="--d:1" cx="12" cy="12" rx="3.8" ry="9" pathLength="1"/>
+          <ellipse class="draw" style="--d:2" cx="12" cy="12" rx="9" ry="3.2" pathLength="1"/>
         </svg>
-      </span>
-        <ul class="link-row reveal-on-scroll" data-bind="links"></ul>
-      </div>
+        <span data-bind="infoLabelContact">Contact</span>
+      </p>
+      <ul class="info-list">
+        <li>
+          <span class="info-list__key" data-bind="infoKeyEmail">Email</span>
+          <a class="info-list__val info-list__val--link" href="mailto:shun.indy@gmail.com">shun.indy@gmail.com</a>
+        </li>
+        <li>
+          <span class="info-list__key" data-bind="infoKeyPhone">Phone</span>
+          <a class="info-list__val info-list__val--link" href="tel:+818033557778">080-3355-7778</a>
+        </li>
+        <li>
+          <span class="info-list__key" data-bind="infoKeyBased">Based in</span>
+          <span class="info-list__val" data-bind="infoValBased">Tokyo, Japan</span>
+        </li>
+        <li>
+          <span class="info-list__key" data-bind="infoKeyLanguages">Languages</span>
+          <span class="info-list__val" data-bind="infoValLanguages">English · 日本語</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">
+        <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path class="draw" style="--d:0" d="M12 3.5 21 19.5 3 19.5 Z" pathLength="1"/>
+          <circle class="draw" style="--d:1" cx="12" cy="14" r="4" pathLength="1"/>
+        </svg>
+        <span data-bind="infoLabelPractice">Practice</span>
+      </p>
+      <p class="info-prose" data-bind="infoPractice">
+        I direct, design, and build for music, culture, and brands that want to be felt.
+        Cinematic and restrained by default — built to land loud when it counts.
+        Most work lives between the precision of design and the warmth of analog sound.
+      </p>
+    </section>
+
+    <!-- Services — borndigital.be-style 4-up: each capability column carries
+         a thin line-art logo that draws itself in on scroll, then keeps a
+         slow ambient motion (transform-only, compositor cheap). -->
+    <section class="info-block info-block--caps reveal">
+      <p class="info-block__label">
+        <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle class="draw" style="--d:0" cx="12" cy="7.5"  r="4" pathLength="1"/>
+          <circle class="draw" style="--d:1" cx="16.5" cy="12" r="4" pathLength="1"/>
+          <circle class="draw" style="--d:2" cx="12" cy="16.5" r="4" pathLength="1"/>
+          <circle class="draw" style="--d:3" cx="7.5" cy="12"  r="4" pathLength="1"/>
+        </svg>
+        <span data-bind="infoLabelServices">Services</span>
+      </p>
+
+      <ul class="info-caps">
+
+        <!-- 01 — Creative Direction & Content · "Strategy" mark:
+             three overlapping circles inside a triangle -->
+        <li class="info-cap reveal">
+          <svg class="cap-logo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <g class="cap-logo__spin cap-logo__spin--cluster">
+              <circle class="draw" style="--d:0" cx="50" cy="40" r="15" pathLength="1"/>
+              <circle class="draw" style="--d:1" cx="36" cy="63" r="15" pathLength="1"/>
+              <circle class="draw" style="--d:2" cx="64" cy="63" r="15" pathLength="1"/>
+            </g>
+            <path class="draw" style="--d:3" d="M50 10 91 84 9 84 Z" pathLength="1"/>
+          </svg>
+          <span class="info-cap__num">01</span>
+          <h2 class="info-cap__title" data-cap="0" data-cap-field="title">Creative Direction &amp; Content</h2>
+          <p class="info-cap__note" data-cap="0" data-cap-field="note">Cinematic and restrained, built to be felt. I direct content that makes the process the story — gear, hands, and Tokyo light over talking heads. Concept to final cut.</p>
+        </li>
+
+        <!-- 02 — Interactive & Web Design · "Technology" mark:
+             wireframe globe with a tilted orbit + satellite dot -->
+        <li class="info-cap reveal">
+          <svg class="cap-logo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <circle  class="draw" style="--d:0" cx="50" cy="50" r="32" pathLength="1"/>
+            <ellipse class="draw" style="--d:1" cx="50" cy="50" rx="13" ry="32" pathLength="1"/>
+            <ellipse class="draw" style="--d:2" cx="50" cy="50" rx="32" ry="11" pathLength="1"/>
+            <g class="cap-logo__spin cap-logo__spin--orbit">
+              <ellipse class="draw" style="--d:3" cx="50" cy="50" rx="44" ry="13" transform="rotate(-24 50 50)" pathLength="1"/>
+              <circle class="cap-logo__dot" cx="90.2" cy="32.1" r="2.6" fill="currentColor" stroke="none"/>
+            </g>
+            <path class="draw" style="--d:4" d="M61 36l10-4-3 9" pathLength="1"/>
+          </svg>
+          <span class="info-cap__num">02</span>
+          <h2 class="info-cap__title" data-cap="1" data-cap-field="title">Interactive &amp; Web Design</h2>
+          <p class="info-cap__note" data-cap="1" data-cap-field="note">Sites and interactive work that move like analog — slow-building, deliberate, with a payoff. Designed and built end to end (this site is one of them).</p>
+        </li>
+
+        <!-- 03 — Brand & Art Direction · "Design" mark:
+             eight-circle flower with a filled eight-point star core -->
+        <li class="info-cap reveal">
+          <svg class="cap-logo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <circle class="draw" style="--d:0" cx="72"   cy="50"   r="16" pathLength="1"/>
+            <circle class="draw" style="--d:1" cx="65.6" cy="65.6" r="16" pathLength="1"/>
+            <circle class="draw" style="--d:2" cx="50"   cy="72"   r="16" pathLength="1"/>
+            <circle class="draw" style="--d:3" cx="34.4" cy="65.6" r="16" pathLength="1"/>
+            <circle class="draw" style="--d:4" cx="28"   cy="50"   r="16" pathLength="1"/>
+            <circle class="draw" style="--d:5" cx="34.4" cy="34.4" r="16" pathLength="1"/>
+            <circle class="draw" style="--d:6" cx="50"   cy="28"   r="16" pathLength="1"/>
+            <circle class="draw" style="--d:7" cx="65.6" cy="34.4" r="16" pathLength="1"/>
+            <g class="cap-logo__spin cap-logo__spin--star">
+              <path class="cap-logo__star" fill="currentColor" stroke="none" d="M50 35 52.3 44.46 60.61 39.39 55.54 47.7 65 50 55.54 52.3 60.61 60.61 52.3 55.54 50 65 47.7 55.54 39.39 60.61 44.46 52.3 35 50 44.46 47.7 39.39 39.39 47.7 44.46 Z"/>
+            </g>
+          </svg>
+          <span class="info-cap__num">03</span>
+          <h2 class="info-cap__title" data-cap="2" data-cap-field="title">Brand &amp; Art Direction</h2>
+          <p class="info-cap__note" data-cap="2" data-cap-field="note">Visual identity for music, culture, and the underground. Analog warmth, restraint, and a point of view — systems recognizable in three seconds.</p>
+        </li>
+
+        <!-- 04 — Music & Sound · companion mark in the same lineage:
+             circle with a breathing sine wave through the middle -->
+        <li class="info-cap reveal">
+          <svg class="cap-logo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <circle class="draw" style="--d:0" cx="50" cy="50" r="34" pathLength="1"/>
+            <g class="cap-logo__wave">
+              <path class="draw" style="--d:1" d="M14 50q9-20 18 0t18 0 18 0 18 0" pathLength="1"/>
+            </g>
+            <circle class="cap-logo__dot" cx="14" cy="50" r="2.4" fill="currentColor" stroke="none"/>
+            <circle class="cap-logo__dot" cx="86" cy="50" r="2.4" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="info-cap__num">04</span>
+          <h2 class="info-cap__title" data-cap="3" data-cap-field="title">Music &amp; Sound</h2>
+          <p class="info-cap__note" data-cap="3" data-cap-field="note">Original score and sound design — analog psychedelic trip-hop: tape saturation, slow builds, climactic drops. Composition, sample packs, and sonic identity.</p>
+        </li>
+
+      </ul>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">
+        <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle class="draw" style="--d:0" cx="12" cy="12" r="9" pathLength="1"/>
+          <circle class="draw" style="--d:1" cx="12" cy="12" r="4.5" pathLength="1"/>
+          <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+        </svg>
+        <span data-bind="infoLabelAvailability">Availability</span>
+      </p>
+      <p class="info-prose" data-bind="infoAvailability">Available for new commissions and collaborations — 2026.</p>
+    </section>
+
+    <section class="info-block reveal">
+      <p class="info-block__label">
+        <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle class="draw" style="--d:0" cx="12" cy="12" r="4.5" pathLength="1"/>
+          <ellipse class="draw" style="--d:1" cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" pathLength="1"/>
+          <circle cx="21" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+        </svg>
+        <span data-bind="infoLabelElsewhere">Elsewhere</span>
+      </p>
+      <ul class="info-links">
+        <li><a href="https://shunindy9.github.io/lemon-king-library" target="_blank" rel="noopener noreferrer">GitHub / Portfolio</a></li>
+        <li><a href="#" data-todo>Instagram</a></li>
+        <li><a href="#" data-todo>Bandcamp</a></li>
+        <li><a href="#" data-todo>YouTube</a></li>
+      </ul>
     </section>
 
   </main>
 
-  <footer class="site-footer">
-    <div class="site-footer__top">
-      <a class="site-footer__email" data-bind="footer-email" href="#">—</a>
-      <span class="pulse-beam" data-pulse>
-        <button class="back-to-top" type="button" aria-label="Back to top">
-          <span class="back-to-top__label" data-bind="backToTopLabel">Back to top</span>
-          <span class="back-to-top__arrow" aria-hidden="true">↑</span>
-        </button>
-        <svg class="pulse-beam__svg" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="pulse-grad-btt" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#ff003c" stop-opacity="0"/>
-              <stop offset="25%"  stop-color="#39ff14" stop-opacity="1"/>
-              <stop offset="55%"  stop-color="#00f0ff" stop-opacity="1"/>
-              <stop offset="80%"  stop-color="#ff14d4" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#ff003c" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path class="pulse-beam__base"  fill="none" stroke="rgba(57,255,20,0.18)" stroke-width="1"/>
-          <path class="pulse-beam__pulse" fill="none" stroke="url(#pulse-grad-btt)" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
-    </div>
-    <div class="site-footer__wordmark" aria-hidden="true" data-bind="footer-wordmark">—</div>
-    <div class="site-footer__meta">
-      <p class="site-footer__credit" data-bind="credit">—</p>
-      <p class="site-footer__clock"><time class="jst-clock" data-bind="clock-footer">—</time> JST</p>
-      <p class="site-footer__year">© <span data-bind="year">—</span></p>
-    </div>
+  <footer class="info-footer">
+    <p>© <span id="info-year">—</span> Shunsuke Otsuki — <span data-bind="credit">Designed &amp; built in Tokyo.</span></p>
   </footer>
 
-  <!-- Motion libraries (CDN). All loaded with defer. -->
-  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-
-  <!-- Site scripts -->
-  <script defer src="js/config.js?v=2026061018"></script>
-  <script defer src="js/visual.js?v=2026061018"></script>
-  <script defer src="js/main.js?v=2026061018"></script>
+  <script defer src="js/config.js?v=2026061201"></script>
+  <script defer src="js/info.js?v=2026061201"></script>
 </body>
 </html>

@@ -151,8 +151,19 @@
     document.documentElement.lang = (lang === "ja") ? "ja" : "en";
   }
 
-  // Initial render — English
-  applyStrings("en");
+  // Initial render — saved language (carries over from the home page),
+  // falling back to English. No glitch on first paint.
+  try {
+    if (localStorage.getItem("portfolio-lang") === "ja") currentLang = "ja";
+  } catch (_) {}
+  applyStrings(currentLang);
+  if (currentLang === "ja") {
+    const tog0 = q(".lang-toggle");
+    if (tog0) tog0.dataset.state = "ja";
+    qa(".lang-toggle__btn").forEach(b => {
+      b.setAttribute("aria-pressed", b.dataset.lang === "ja" ? "true" : "false");
+    });
+  }
 
   /* ============================================================
    * GLITCH TRANSLATE — char scramble + RGB split + scanline overlay.
@@ -230,6 +241,7 @@
   function setLang(lang) {
     if (lang === currentLang) return;
     currentLang = lang;
+    try { localStorage.setItem("portfolio-lang", lang); } catch (_) {}
 
     // Update toggle UI state
     const tog = q(".lang-toggle");

@@ -1,14 +1,136 @@
-/* Info page — minimal. Live JST clock, year, a simple IntersectionObserver
- * for .reveal fade-up, and a 0.25x slow-down on the background video. */
+/* Info page (site home) — JST clock, year, EN/JP translation with the same
+ * glitch-scramble engine as the work page, reveal-on-scroll (which also
+ * triggers the line-art logo draw-ins), and the interactive background. */
 (function () {
+  var CONFIG = window.SITE_CONFIG || {};
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Background video: slow motion (4x slower than source) is now BAKED
-  // INTO the encode via ffmpeg motion-compensated interpolation, so we
-  // play at normal speed. The file itself is 30s of smooth slow-mo at
-  // CRF 20 native 1024x1024 — way smoother than browser frame-hold.
+  var q  = function (s, r) { return (r || document).querySelector(s); };
+  var qa = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  // Live JST clock (HH:MM, ticks every 30s).
-  var clockEls = document.querySelectorAll(".jst-clock");
+  /* --------------------------------------------------------------
+   * I18N — mirrors main.js. CONFIG holds English at the top level,
+   * CONFIG.ja mirrors keys for Japanese; missing JA keys fall back.
+   * The chosen language persists in localStorage so it carries
+   * across the home and work pages.
+   * -------------------------------------------------------------- */
+  var currentLang = "en";
+
+  function getString(lang, key) {
+    if (lang === "ja" && CONFIG.ja && CONFIG.ja[key] != null) return CONFIG.ja[key];
+    return CONFIG[key];
+  }
+
+  function applyStrings(lang) {
+    qa("[data-bind]").forEach(function (el) {
+      var v = getString(lang, el.dataset.bind);
+      if (typeof v === "string") el.textContent = v;
+    });
+    // Capability cards — title/note pulled from CONFIG.capabilities[i]
+    var caps = (lang === "ja" && CONFIG.ja && CONFIG.ja.capabilities) || CONFIG.capabilities || [];
+    qa("[data-cap]").forEach(function (el) {
+      var cap = caps[+el.dataset.cap];
+      var field = el.dataset.capField;
+      if (cap && typeof cap[field] === "string") el.textContent = cap[field];
+    });
+    document.documentElement.lang = (lang === "ja") ? "ja" : "en";
+  }
+
+  /* Glitch translate — char scramble toward the new-language text.
+   * Same pool + motion language as main.js. */
+  var GLITCH_DURATION_MS = 700;
+  var SCRAMBLE_POOL =
+    "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン" +
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+    "abcdefghijklmnopqrstuvwxyz" +
+    "0123456789#%&*+-=◇◆◢◤★▲▼■□";
+  var SKIP_BIND = { langLabelEN: 1, langLabelJP: 1 };
+
+  function scrambleToward(el, finalText, duration) {
+    el.classList.add("glitching");
+    var start = performance.now();
+    var len = finalText.length;
+    (function step() {
+      var elapsed = performance.now() - start;
+      if (elapsed >= duration) {
+        el.textContent = finalText;
+        el.classList.remove("glitching");
+        return;
+      }
+      var t = elapsed / duration;
+      var out = "";
+      for (var i = 0; i < len; i++) {
+        var ch = finalText[i];
+        if (ch === " " || ch === "\n" || ch === "\t") {
+          out += ch;
+        } else if (t > (i / Math.max(1, len)) * 0.85 + 0.12) {
+          out += ch;
+        } else {
+          out += SCRAMBLE_POOL[(Math.random() * SCRAMBLE_POOL.length) | 0];
+        }
+      }
+      el.textContent = out;
+      requestAnimationFrame(step);
+    })();
+  }
+
+  function collectGlitchTargets() {
+    var out = [];
+    qa("[data-bind]").forEach(function (el) {
+      if (SKIP_BIND[el.dataset.bind]) return;
+      if (!el.textContent.trim()) return;
+      out.push(el);
+    });
+    qa("[data-cap]").forEach(function (el) { out.push(el); });
+    return out;
+  }
+
+  function syncToggleUI(lang) {
+    var tog = q(".lang-toggle");
+    if (tog) tog.dataset.state = lang;
+    qa(".lang-toggle__btn").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.lang === lang ? "true" : "false");
+    });
+  }
+
+  function setLang(lang, animate) {
+    if (lang === currentLang) return;
+    currentLang = lang;
+    try { localStorage.setItem("portfolio-lang", lang); } catch (_) {}
+    syncToggleUI(lang);
+
+    applyStrings(lang);
+    if (!animate || reduceMotion) return;
+
+    document.body.classList.add("is-translating");
+    collectGlitchTargets().forEach(function (el) {
+      var finalText = el.textContent;
+      var d = GLITCH_DURATION_MS * (0.85 + Math.random() * 0.35);
+      scrambleToward(el, finalText, d);
+    });
+    setTimeout(function () {
+      document.body.classList.remove("is-translating");
+      qa(".glitching").forEach(function (el) { el.classList.remove("glitching"); });
+    }, GLITCH_DURATION_MS + 200);
+  }
+
+  qa(".lang-toggle__btn").forEach(function (btn) {
+    btn.addEventListener("click", function () { setLang(btn.dataset.lang, true); });
+  });
+
+  // Initial language — saved choice carries over from the work page.
+  var savedLang = null;
+  try { savedLang = localStorage.getItem("portfolio-lang"); } catch (_) {}
+  if (savedLang === "ja") {
+    setLang("ja", false);
+  } else {
+    applyStrings("en");
+  }
+
+  /* --------------------------------------------------------------
+   * Live JST clock (HH:MM, ticks every 30s) + year.
+   * -------------------------------------------------------------- */
+  var clockEls = qa(".jst-clock");
   function tick() {
     var t;
     try {
@@ -26,7 +148,6 @@
     setInterval(tick, 30000);
   }
 
-  // Current year.
   var yearEl = document.getElementById("info-year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -52,12 +173,8 @@
     pendingScroll = false;
     var max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
     var p = Math.min(1, Math.max(0, window.scrollY / max));
-    // DSOTM spectrum: 0 -> red, 0.16 -> orange, 0.32 -> yellow,
-    // 0.5 -> green, 0.66 -> blue, 0.82 -> violet, 1 -> red again.
-    // hue-rotate spans 360deg total so the loop closes cleanly.
     root.style.setProperty("--bg-hue", (p * 360).toFixed(1) + "deg");
     root.style.setProperty("--bg-con", (1.05 + p * 0.35).toFixed(2));
-    // Flash from below kicks in over the last 8% of the page.
     var flash = Math.max(0, (p - 0.92) / 0.08);
     root.style.setProperty("--flash-opacity", flash.toFixed(3));
   }
@@ -66,13 +183,10 @@
     pendingPointer = false;
     root.style.setProperty("--mouse-x", (lastPointer.x * 100).toFixed(2) + "%");
     root.style.setProperty("--mouse-y", (lastPointer.y * 100).toFixed(2) + "%");
-    // Lens hue follows the cursor's horizontal position so left side
-    // reads warm (magenta/red), right side reads cool (cyan/violet).
     var lensHue = 260 + (lastPointer.x - 0.5) * 200;
     root.style.setProperty("--lens-hue", lensHue.toFixed(1));
-    // Mouse vertical distance from center boosts saturation.
-    var dy = Math.abs(lastPointer.y - 0.5) * 2;          // 0 (center) .. 1 (edge)
-    var sat = 1.4 + dy * 1.4;                            // 1.4 .. 2.8
+    var dy = Math.abs(lastPointer.y - 0.5) * 2;
+    var sat = 1.4 + dy * 1.4;
     root.style.setProperty("--bg-sat", sat.toFixed(2));
   }
 
@@ -104,9 +218,12 @@
   applyScroll();
   applyPointer();
 
-  // Reveal-on-scroll.
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var targets = document.querySelectorAll(".reveal");
+  /* --------------------------------------------------------------
+   * Reveal-on-scroll. Adding .is-in also kicks off the line-art logo
+   * draw-in (stroke-dashoffset transition in info.css) and starts the
+   * ambient spin animations on the capability logos.
+   * -------------------------------------------------------------- */
+  var targets = qa(".reveal");
   if (reduceMotion || !("IntersectionObserver" in window)) {
     targets.forEach(function (el) { el.classList.add("is-in"); });
     return;

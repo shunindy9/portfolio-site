@@ -73,6 +73,29 @@ window.SITE_CONFIG = {
   navAbout:   "About",
   navContact: "Contact",
 
+  // Info page (the site home) — hero, CTAs, section labels, copy
+  infoWorkLabel:         "View Work",
+  infoEyebrow:           "Personal Information",
+  infoTagline:           "Creative Director · Designer · Technologist — Tokyo.",
+  infoEmailCta:          "Email Me",
+  infoCallCta:           "Call Me",
+  infoLabelContact:      "Contact",
+  infoLabelPractice:     "Practice",
+  infoLabelServices:     "Services",
+  infoLabelAvailability: "Availability",
+  infoLabelElsewhere:    "Elsewhere",
+  infoKeyEmail:          "Email",
+  infoKeyPhone:          "Phone",
+  infoKeyBased:          "Based in",
+  infoKeyLanguages:      "Languages",
+  infoValBased:          "Tokyo, Japan",
+  infoValLanguages:      "English · 日本語",
+  infoPractice:
+    "I direct, design, and build for music, culture, and brands that want to be felt. " +
+    "Cinematic and restrained by default — built to land loud when it counts. " +
+    "Most work lives between the precision of design and the warmth of analog sound.",
+  infoAvailability: "Available for new commissions and collaborations — 2026.",
+
   // Section labels
   capsEyebrow:    "01 — Capabilities",
   capsTitle:      "What I can be hired for.",
@@ -119,6 +142,28 @@ window.SITE_CONFIG = {
     navCaps:    "提供スキル",
     navAbout:   "プロフィール",
     navContact: "お問い合わせ",
+
+    infoWorkLabel:         "作品を見る",
+    infoEyebrow:           "プロフィール",
+    infoTagline:           "クリエイティブディレクター／デザイナー／テクノロジスト ─ 東京。",
+    infoEmailCta:          "メールする",
+    infoCallCta:           "電話する",
+    infoLabelContact:      "連絡先",
+    infoLabelPractice:     "仕事について",
+    infoLabelServices:     "提供スキル",
+    infoLabelAvailability: "稼働状況",
+    infoLabelElsewhere:    "リンク",
+    infoKeyEmail:          "メール",
+    infoKeyPhone:          "電話",
+    infoKeyBased:          "拠点",
+    infoKeyLanguages:      "言語",
+    infoValBased:          "東京・日本",
+    infoValLanguages:      "英語・日本語",
+    infoPractice:
+      "音楽、カルチャー、そして心を動かしたいブランドのために ─ ディレクション、デザイン、実装まで一貫して。" +
+      "ふだんはシネマティックに、抑えて。鳴らすべき瞬間に、しっかり鳴らす。" +
+      "仕事の多くは、デザインの精度とアナログサウンドの温度のあいだに。",
+    infoAvailability: "2026年 ─ 新規のご依頼・コラボレーションを受付中。",
 
     about:
       "東京を拠点に、クリエイティブディレクション／デザイン／テクノロジーを横断して活動。" +
