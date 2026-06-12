@@ -1,4 +1,43 @@
 /* ===========================================================================
+ * Self-hosted DSEG14 Classic Bold digital-clock face (SIL OFL).
+ * Source: github.com/keshikan/DSEG v0.46. Only DSEG14 is shipped —
+ * DSEG7 was tried first but its 7-segment letters read as encrypted
+ * for non-numeric text. Latin-only via unicode-range so JP characters
+ * fall through to Noto Sans JP. */
+@font-face {
+  font-family: "DSEG14 Classic";
+  src: url("../assets/fonts/DSEG14Classic-Bold.woff2") format("woff2"),
+       url("../assets/fonts/DSEG14Classic-Bold.ttf")   format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF;
+}
+
+/* Electroharmonix (Typodermic) — Latin glyphs drawn to read as katakana.
+ * Used ONLY in Japanese mode: Latin fragments get the faux-JP face while
+ * real kana/kanji fall through to Noto Sans JP via unicode-range. */
+@font-face {
+  font-family: "Electroharmonix";
+  src: url("../assets/fonts/Electroharmonix.woff2") format("woff2"),
+       url("../assets/fonts/Electroharmonix.otf")   format("opentype");
+  font-display: swap;
+  unicode-range: U+0020-007E;
+}
+
+/* Axzer Sports (demo) — the off-white body voice. Letters only: the
+ * demo cut ships no digits, so numbers (phone, years) fall back to the
+ * body stack per-glyph instead of rendering tofu. */
+@font-face {
+  font-family: "Axzer Sports";
+  src: url("../assets/fonts/AxzerSportsDemo-Regular.woff2") format("woff2"),
+       url("../assets/fonts/AxzerSportsDemo-Regular.otf")   format("opentype");
+  font-display: swap;
+  unicode-range: U+0041-005A, U+0061-007A;
+}
+
+
+/* ===========================================================================
  * Tokyo Analog — portfolio
  * Restraint is the flex. Warm, cinematic, quiet — alive in one place.
  * ======================================================================== */
@@ -79,7 +118,7 @@
   --glass-blur:      18px;
   --glass-tint:      rgba(8, 12, 18, 0.40);
   --glass-tint-flat: rgba(8, 12, 18, 0.55); /* no-blur fallback variant   */
-  --glass-radius:    18px;
+  --glass-radius:    26px;                  /* capsule-ish — water tube   */
   --glass-highlight: rgba(255, 255, 255, 0.12);
 }
 
@@ -1655,18 +1694,54 @@ body.is-loud-beat .status__dot {
 .glass--flat {
   position: relative;
   overflow: hidden; /* clips the specular sweep strip */
-  background: var(--glass-tint);
+  /* "Water tube" shading — curved edge darkening + a vertical meniscus
+   * highlight band + top water-line sheen, layered over the tint. All
+   * static gradients: the cylindrical read costs nothing per frame. */
+  background:
+    linear-gradient(90deg, rgba(2, 4, 8, 0.32) 0%, transparent 6%, transparent 94%, rgba(2, 4, 8, 0.32) 100%),
+    linear-gradient(90deg, transparent 4.5%, rgba(255, 255, 255, 0.11) 7.5%, rgba(255, 255, 255, 0.02) 12%, transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(2, 4, 8, 0.20) 100%),
+    var(--glass-tint);
   border-radius: var(--glass-radius);
   box-shadow:
     inset 1px 1px 0 var(--glass-highlight),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset -2px 0 6px -2px rgba(255, 255, 255, 0.05),
     0 12px 32px -12px rgba(0, 0, 0, 0.50);
 }
 .glass {
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
 }
-.glass--flat { background: var(--glass-tint-flat); }
+.glass--flat {
+  background:
+    linear-gradient(90deg, rgba(2, 4, 8, 0.32) 0%, transparent 6%, transparent 94%, rgba(2, 4, 8, 0.32) 100%),
+    linear-gradient(90deg, transparent 4.5%, rgba(255, 255, 255, 0.10) 7.5%, rgba(255, 255, 255, 0.02) 12%, transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 12%, transparent 88%, rgba(2, 4, 8, 0.20) 100%),
+    var(--glass-tint-flat);
+}
+
+/* Caustics — two soft light blobs drifting inside the glass like light
+ * refracted through moving water. Transform-only on a ::before layer;
+ * runs only while the panel is revealed. (Scoped off cap-grid items,
+ * whose ::before is their accent line.) */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  pointer-events: none;
+  background:
+    radial-gradient(32% 26% at 30% 68%, rgba(255, 255, 255, 0.055), transparent 70%),
+    radial-gradient(24% 20% at 72% 28%, rgba(79, 214, 224, 0.05), transparent 70%);
+  transform: translate3d(-3%, -2%, 0);
+  animation: glass-caustic 12s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.glass.is-lit::before,
+.glass.is-in::before { animation-play-state: running; }
+@keyframes glass-caustic {
+  to { transform: translate3d(3%, 2.5%, 0) rotate(1.6deg); }
+}
 
 /* Specular sweep — a slow diagonal light band crossing the panel, like a
  * reflection sliding over real glass. Transform-only (compositor cheap,
@@ -1831,8 +1906,46 @@ body.is-loud-beat .status__dot {
     --glass-tint-flat: rgba(244, 239, 226, 0.94);
   }
   .glass::after,
-  .glass--flat::after { animation: none; content: none; }
+  .glass--flat::after,
+  .glass::before { animation: none; content: none; }
   .bulb:hover, .bulb:focus-visible, .bulb.is-hot { animation: none; }
   .control-btn { animation: none; }
   .spotlight { display: none; }
+}
+
+/* ===========================================================================
+ * WORLD-CLOCK TICKER — the TOKYO clock, gone global. A masked belt of
+ * city · time pairs slides left forever; two identical sequences make the
+ * -50% translateX loop seamless. transform-only (compositor cheap); the
+ * text is re-rendered every 30s by info.js without touching the motion.
+ * ======================================================================== */
+.world-ticker {
+  overflow: hidden;
+  width: clamp(220px, 26vw, 400px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.world-ticker__belt {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker-slide 36s linear infinite;
+  will-change: transform;
+}
+.world-ticker__seq {
+  display: inline-block;
+  padding-right: 2.4em;
+  font-family: "DSEG14 Classic", var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--analog-yellow, #ffd24a);
+  text-shadow:
+    0 0 4px var(--analog-yellow-glow, rgba(255, 210, 74, 0.55)),
+    0 0 10px var(--analog-yellow-glow-2, rgba(255, 210, 74, 0.22));
+}
+.world-ticker__seq .tick-city { color: var(--analog-yellow-deep, #f0a814); }
+@keyframes ticker-slide {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-ticker__belt { animation: none; }
 }

@@ -194,22 +194,42 @@
   } catch (_) {}
 
   /* --------------------------------------------------------------
-   * Live JST clock (HH:MM, ticks every 30s) + year.
+   * Clocks — JST for any .jst-clock, plus the world-clock ticker.
+   * The ticker belt slides via pure CSS transform; we only re-render
+   * its textContent every 30s so the motion is never disturbed.
    * -------------------------------------------------------------- */
-  var clockEls = qa(".jst-clock");
-  function tick() {
-    var t;
+  function cityTime(tz) {
     try {
-      t = new Date().toLocaleTimeString("en-GB", {
-        timeZone: "Asia/Tokyo",
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit"
+      return new Date().toLocaleTimeString("en-GB", {
+        timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit"
       });
-    } catch (_) { t = "--:--"; }
-    clockEls.forEach(function (el) { el.textContent = t; });
+    } catch (_) { return "--:--"; }
   }
-  if (clockEls.length) {
+
+  var clockEls = qa(".jst-clock");
+  var TICKER_CITIES = [
+    ["TOKYO",       "Asia/Tokyo"],
+    ["LOS ANGELES", "America/Los_Angeles"],
+    ["NEW YORK",    "America/New_York"],
+    ["LONDON",      "Europe/London"],
+    ["PARIS",       "Europe/Paris"],
+    ["BERLIN",      "Europe/Berlin"],
+    ["DUBAI",       "Asia/Dubai"],
+    ["SINGAPORE",   "Asia/Singapore"],
+    ["SYDNEY",      "Australia/Sydney"]
+  ];
+  var tickerSeqs = qa("[data-ticker-seq]");
+  function tick() {
+    var t = cityTime("Asia/Tokyo");
+    clockEls.forEach(function (el) { el.textContent = t; });
+    if (tickerSeqs.length) {
+      var html = TICKER_CITIES.map(function (c) {
+        return '<span class="tick-city">' + c[0] + '</span> ' + cityTime(c[1]);
+      }).join("  ·  ") + "  ·  ";
+      tickerSeqs.forEach(function (el) { el.innerHTML = html; });
+    }
+  }
+  if (clockEls.length || tickerSeqs.length) {
     tick();
     setInterval(tick, 30000);
   }
@@ -245,12 +265,18 @@
     root.style.setProperty("--flash-opacity", flash.toFixed(3));
   }
 
+  var lensCore = document.querySelector(".info-bg-lens-core");
+
   function applyPointer() {
     pendingPointer = false;
     root.style.setProperty("--mouse-x", (lastPointer.x * 100).toFixed(2) + "%");
     root.style.setProperty("--mouse-y", (lastPointer.y * 100).toFixed(2) + "%");
-    var lensHue = 260 + (lastPointer.x - 0.5) * 200;
-    root.style.setProperty("--lens-hue", lensHue.toFixed(1));
+    // Hue-cycling core rides the cursor on a compositor-only transform.
+    if (lensCore) {
+      lensCore.style.transform =
+        "translate3d(" + (lastPointer.x * window.innerWidth).toFixed(1) + "px," +
+        (lastPointer.y * window.innerHeight).toFixed(1) + "px,0)";
+    }
     var dy = Math.abs(lastPointer.y - 0.5) * 2;
     var sat = 1.4 + dy * 1.4;
     root.style.setProperty("--bg-sat", sat.toFixed(2));

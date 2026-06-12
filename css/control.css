@@ -1,21 +1,39 @@
 /* ===========================================================================
- * CONTROL — the spaceship cockpit. Layers bottom→top:
- *   video (space) → scrim → Three.js stage canvas → DOM holograms →
- *   deck (bottom) → entrance/exit flash.
- * Design language: Analog Liquid Glass (style.css) + chunky 90s-anime
- * deck hardware. Everything respects prefers-reduced-motion.
+ * CONTROL — the spaceship cockpit, v2.
+ * Deck: Mœbius layout & density (radar scope, gridded buttons, cream
+ * keyboard, lever faders) rendered in Syd Mead materials (brushed metal,
+ * walnut bullnose, backlit jewel keys, film grain).
+ * Stage: Image-3 "specimen lab" — wireframe lattice + strata on near-black,
+ * flanked by glowing data columns.
+ * Everything respects prefers-reduced-motion; every animation here is
+ * transform/opacity-only (the perf rules of this site).
  * ======================================================================== */
 
 .control-page {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: var(--space);
+  background: #05070b;
   color: var(--ink);
   font-family: var(--font-body);
+
+  /* Console material palette (Image 1 + Image 2) */
+  --steel-blue:   #3a6390;
+  --steel-deep:   #274867;
+  --ink-line:     #0b0f14;
+  --cream:        #ddd6c2;
+  --cream-deep:   #c9c0a8;
+  --console-org:  #FF8A1E;
+  --console-red:  #E0492F;
+  --console-blue: #3B7BD6;
+  --crt-green:    #39ff14;
+  --metal-hi:     #98a2ae;
+  --metal-lo:     #5a6470;
+  --walnut-hi:    #6b4527;
+  --walnut-lo:    #41280f;
 }
 
-/* ----- Background ----- */
+/* ----- Background — crushed near-black so the lab owns the light ----- */
 .control-bg-video {
   position: fixed;
   inset: 0;
@@ -24,7 +42,7 @@
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
-  filter: sepia(1) hue-rotate(160deg) saturate(1.6) contrast(1.2) brightness(0.7);
+  filter: sepia(1) hue-rotate(160deg) saturate(1.3) contrast(1.25) brightness(0.38);
 }
 .control-bg-scrim {
   position: fixed;
@@ -32,8 +50,8 @@
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 30%, transparent 0%, rgba(10, 14, 20, 0.55) 70%, rgba(10, 14, 20, 0.9) 100%),
-    linear-gradient(180deg, rgba(10, 14, 20, 0.45) 0%, rgba(10, 14, 20, 0.30) 45%, rgba(10, 14, 20, 0.85) 100%);
+    radial-gradient(120% 90% at 50% 32%, rgba(3, 5, 8, 0.55) 0%, rgba(3, 5, 8, 0.82) 70%, rgba(3, 5, 8, 0.96) 100%),
+    linear-gradient(180deg, rgba(3, 5, 8, 0.6) 0%, rgba(3, 5, 8, 0.5) 45%, rgba(3, 5, 8, 0.92) 100%);
 }
 
 /* ----- Entrance / exit flash ----- */
@@ -64,15 +82,9 @@
   pointer-events: none;
 }
 .control-header .control-btn { pointer-events: auto; }
-.control-meta {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--neo-cyan);
-  text-shadow: 0 0 8px rgba(79, 214, 224, 0.5);
-}
+.control-header .world-ticker { width: clamp(220px, 30vw, 440px); }
 
-/* ----- Stage (Three.js canvas + holograms) ----- */
+/* ----- Stage ----- */
 .stage {
   position: fixed;
   inset: 0;
@@ -90,12 +102,12 @@
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--neo-amber);
-  opacity: 0.8;
+  color: var(--neo-cyan);
+  opacity: 0.85;
 }
 .stage__fallback svg {
-  width: min(46vmin, 380px);
-  filter: drop-shadow(0 0 14px rgba(255, 179, 92, 0.35));
+  width: min(40vmin, 300px);
+  filter: drop-shadow(0 0 14px rgba(79, 214, 224, 0.35));
 }
 .stage__hint {
   position: absolute;
@@ -106,30 +118,74 @@
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.3em;
-  color: rgba(242, 245, 248, 0.45);
+  color: rgba(242, 245, 248, 0.40);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
 
-/* ----- Hologram panel ----- */
+/* ----- Data columns — Image 3's flanking glowing terminal text ----- */
+.data-col {
+  position: fixed;
+  top: 92px;
+  bottom: 250px;
+  width: clamp(120px, 12vw, 170px);
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.65;
+  letter-spacing: 0.08em;
+  white-space: pre;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+}
+.data-col--left {
+  left: clamp(14px, 2.4vw, 40px);
+  color: #5dff4a;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.55), 0 0 14px rgba(57, 255, 20, 0.2);
+}
+.data-col--right {
+  right: clamp(14px, 2.4vw, 40px);
+  color: #ffb347;
+  text-align: right;
+  text-shadow: 0 0 6px rgba(255, 138, 30, 0.55), 0 0 14px rgba(255, 138, 30, 0.2);
+}
+.data-col--right .data-col__rows { display: block; }
+.data-col__thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  margin: 10px 0;
+}
+.data-thumb {
+  width: 44px;
+  height: 30px;
+  border: 1px solid rgba(255, 138, 30, 0.5);
+  box-shadow: 0 0 8px rgba(255, 138, 30, 0.25);
+}
+.data-thumb--galaxy  { background: radial-gradient(circle at 60% 45%, #fff 0%, #b9d6ff 8%, #3a2a66 45%, #05070b 90%); }
+.data-thumb--grid    { background: linear-gradient(#05070b, #05070b), repeating-linear-gradient(90deg, rgba(79,214,224,0.7) 0 1px, transparent 1px 7px), repeating-linear-gradient(0deg, rgba(79,214,224,0.7) 0 1px, transparent 1px 7px); background-blend-mode: screen; }
+.data-thumb--terrain { background: linear-gradient(180deg, #1c2f4d 0%, #2d5a3a 55%, #74552c 100%); }
+
+/* ----- Hologram panel (unchanged recipe, sits above the lattice) ----- */
 .holo {
   position: absolute;
   left: 50%;
-  bottom: clamp(180px, 26vh, 250px);
+  bottom: clamp(200px, 28vh, 270px);
   transform: translateX(-50%);
   width: min(620px, calc(100vw - 2 * var(--pad-x)));
-  max-height: min(54vh, 480px);
+  max-height: min(50vh, 460px);
   overflow-y: auto;
   z-index: 10;
   padding: 26px 30px 30px;
-  /* Cyan-leaning glass — a projection, not a surface. */
-  background: rgba(8, 16, 22, 0.50);
+  background: rgba(8, 16, 22, 0.55);
   border: 1px solid rgba(79, 214, 224, 0.28);
   box-shadow:
     inset 1px 1px 0 rgba(255, 255, 255, 0.10),
     0 0 24px rgba(79, 214, 224, 0.14),
     0 24px 48px -18px rgba(0, 0, 0, 0.7);
-  /* Holographic mask — fades at the bottom like a projection cone. */
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, #000 88%, transparent 100%);
 }
@@ -158,7 +214,6 @@
   color: var(--neo-cyan);
   text-shadow: 0 0 8px rgba(79, 214, 224, 0.5);
 }
-
 .holo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .holo-list li { display: grid; grid-template-columns: 84px 1fr; gap: 16px; align-items: baseline; }
 .holo-list__key {
@@ -174,8 +229,7 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 .holo__cta-row .info-cta { padding: 11px 20px; border-radius: 999px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
 .holo__cta-row .info-cta--primary { background: var(--accent-amber); color: #14110a; border: 1px solid var(--accent-amber); }
 .holo__cta-row .info-cta--secondary { background: rgba(242,245,248,0.05); color: var(--ink); border: 1px solid rgba(242,245,248,0.4); }
-
-.holo-services { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: svc; }
+.holo-services { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .holo-services li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
 .holo-services .holo-svc__num {
   font-family: var(--font-mono);
@@ -186,7 +240,6 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 }
 .holo-services .holo-svc__title { margin: 0 0 4px; font-size: 16px; font-weight: 500; color: var(--ink); }
 .holo-services .holo-svc__note  { margin: 0; font-size: 13px; line-height: 1.55; color: rgba(242, 245, 248, 0.75); }
-
 .holo__soon {
   margin: 6px 0 8px;
   font-family: var(--font-mono);
@@ -199,13 +252,8 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 @keyframes holo-blink { 50% { opacity: 0; } }
 .holo__soon-sub { margin: 0; font-size: 13px; color: rgba(242, 245, 248, 0.65); }
 
-/* ----- Gauges ----- */
-.gauge {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 64px;
-}
+/* ----- Gauges (SYSTEM hologram) ----- */
+.gauge { display: flex; flex-direction: column; gap: 3px; min-width: 64px; }
 .gauge__label {
   font-family: var(--font-mono);
   font-size: 9.5px;
@@ -220,14 +268,10 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 }
 .gauge__value--lg { font-size: 22px; }
 .gauge__value--dim { color: rgba(242, 245, 248, 0.55); text-shadow: none; font-family: var(--font-mono); font-size: 11px; }
-.gauge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px 28px;
-}
+.gauge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px 28px; }
 .gauge--lg { gap: 6px; }
 
-/* ----- Orbiting signature (bottom-left worm marquee) ----- */
+/* ----- Orbiting signature ----- */
 .orbit-sign {
   position: fixed;
   left: clamp(14px, 2vw, 28px);
@@ -245,110 +289,284 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
   filter: drop-shadow(0 0 6px rgba(255, 179, 92, 0.5));
 }
 
-/* ====================== THE DECK ====================== */
+/* ===========================================================================
+ * THE DECK — brushed metal housing, steel-blue modules with black ink
+ * outlines and rivets, walnut bullnose front edge, film grain.
+ * ======================================================================== */
 .deck {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 15;
-  padding: 18px var(--pad-x) 22px;
+  padding: 26px var(--pad-x) 6px;
+  /* Brushed aluminum: vertical sheen + fine horizontal brushing lines */
   background:
-    linear-gradient(180deg, rgba(16, 22, 30, 0.92) 0%, rgba(10, 14, 20, 0.97) 100%);
-  border-top: 3px solid rgba(79, 214, 224, 0.35);
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--metal-hi) 0%, #76808c 12%, var(--metal-lo) 55%, #454e58 100%);
+  border-top: 2px solid #aeb8c4;
   box-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.08),
-    0 -18px 48px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 -1px 0 var(--ink-line),
+    0 -22px 56px rgba(0, 0, 0, 0.75),
+    inset 0 2px 0 rgba(255, 255, 255, 0.25);
 }
-/* Chunky 90s-anime panel lines. */
-.deck__rail {
+
+/* Curved cable run across the back of the desk (Image 1) */
+.deck__cable {
   position: absolute;
-  top: 7px;
+  top: -26px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.deck__cable svg { width: 100%; height: 100%; }
+
+/* Indicator strip — amber/green/red segments (Image 2's readout bar) */
+.deck__indicator {
+  position: absolute;
+  top: 8px;
   left: var(--pad-x);
   right: var(--pad-x);
-  height: 3px;
+  height: 5px;
+  border-radius: 2px;
   background: repeating-linear-gradient(
     90deg,
-    rgba(255, 179, 92, 0.55) 0 26px,
-    transparent 26px 38px,
-    rgba(79, 214, 224, 0.5) 38px 64px,
-    transparent 64px 76px
+    rgba(255, 138, 30, 0.85) 0 18px,  rgba(20, 25, 32, 0.9) 18px 24px,
+    rgba(57, 255, 20, 0.65) 24px 38px, rgba(20, 25, 32, 0.9) 38px 44px,
+    rgba(224, 73, 47, 0.80) 44px 56px, rgba(20, 25, 32, 0.9) 56px 78px
   );
-  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255, 138, 30, 0.25), inset 0 1px 1px rgba(0, 0, 0, 0.6);
 }
+
+/* Film grain — static SVG noise, one layer over the whole desk */
+.deck__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+}
+
+/* Walnut bullnose front edge (Image 2) */
+.deck__walnut {
+  height: 16px;
+  margin: 14px calc(-1 * var(--pad-x)) 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px 9px, rgba(0,0,0,0.08) 9px 14px, transparent 14px 23px),
+    linear-gradient(180deg, var(--walnut-hi) 0%, #54351a 45%, var(--walnut-lo) 100%);
+  border-top: 1px solid rgba(255, 220, 170, 0.35);
+  border-radius: 0 0 6px 6px;
+  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.12), inset 0 -3px 5px rgba(0, 0, 0, 0.5);
+}
+
 .deck__inner {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: clamp(14px, 2.4vw, 34px);
+  align-items: stretch;
+  gap: clamp(10px, 1.6vw, 22px);
   flex-wrap: wrap;
 }
-.deck__cluster { display: flex; align-items: center; gap: 10px; }
-.deck__cluster--gauges { gap: 22px; margin-left: auto; }
 
-/* Keys — chunky, tactile, lit. */
-.deck-key {
-  appearance: none;
-  border: 0;
-  cursor: pointer;
+/* ----- Steel-blue module panels w/ ink outline + rivets ----- */
+.deck-module {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, var(--steel-blue) 0%, var(--steel-deep) 100%);
+  border: 1px solid var(--ink-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+    0 3px 6px rgba(0, 0, 0, 0.4);
+  /* Corner rivets */
+  background-image:
+    radial-gradient(circle at 7px 7px,                       #e8edf2 0 1.4px, #6a7480 2.6px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 7px) 7px,          #e8edf2 0 1.4px, #6a7480 2.6px, transparent 3.4px),
+    radial-gradient(circle at 7px calc(100% - 7px),          #e8edf2 0 1.4px, #6a7480 2.6px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 7px) calc(100% - 7px), #e8edf2 0 1.4px, #6a7480 2.6px, transparent 3.4px),
+    linear-gradient(180deg, var(--steel-blue) 0%, var(--steel-deep) 100%);
+}
+.deck-module__tag {
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  padding: 13px 16px 15px;
-  border-radius: 9px;
-  color: var(--ink);
-  background: linear-gradient(180deg, #232c38 0%, #161d26 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    0 4px 0 #0a0e14,
-    0 6px 10px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  text-shadow: 0 0 8px rgba(255, 179, 92, 0.0);
-  transition: transform 90ms var(--ease-out), box-shadow 90ms var(--ease-out), text-shadow 200ms;
+  font-size: 8.5px;
+  letter-spacing: 0.26em;
+  color: var(--cream);
+  opacity: 0.85;
+  text-transform: uppercase;
 }
-.deck-key:hover { text-shadow: 0 0 8px rgba(255, 179, 92, 0.6); }
-.deck-key:active,
-.deck-key.is-pressed {
-  transform: translateY(3px);
-  box-shadow:
-    0 1px 0 #0a0e14,
-    0 2px 5px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-.deck-key.is-active {
-  color: #14110a;
-  background: linear-gradient(180deg, var(--neo-amber) 0%, #d98e3a 100%);
-  text-shadow: none;
-  box-shadow:
-    0 4px 0 #7a4c16,
-    0 6px 14px rgba(255, 179, 92, 0.35),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-.deck-key--cyan.is-active {
-  background: linear-gradient(180deg, var(--neo-cyan) 0%, #2a9aa6 100%);
-  box-shadow:
-    0 4px 0 #115059,
-    0 6px 14px rgba(79, 214, 224, 0.35),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-.deck-key--soon { opacity: 0.66; }
-.deck-key--exit {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  color: #ffd9d9;
-  background: linear-gradient(180deg, #4a1d22 0%, #2c1114 100%);
-  border-top: 1px solid rgba(255, 120, 120, 0.35);
-  box-shadow:
-    0 4px 0 #160709,
-    0 6px 10px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 100, 100, 0.12);
-}
-.deck-key--exit:hover { text-shadow: 0 0 10px rgba(255, 100, 100, 0.7); }
-.deck-key:focus-visible { outline: 2px solid var(--neo-cyan); outline-offset: 3px; }
 
-/* Mute switch — a little lever. */
+/* ----- Radar scope — concentric rings, spokes, amber orb, sweep ----- */
+.deck-module--radar { align-items: center; justify-content: center; }
+.radar {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 138, 30, 0.22) 0 1px, transparent 1px 12px),
+    radial-gradient(circle at 50% 50%, #100b06 0%, #060403 100%);
+  border: 3px solid #1b2733;
+  box-shadow:
+    0 0 0 1px var(--ink-line),
+    0 0 0 4px #2e3d4d,
+    0 0 0 5px var(--ink-line),
+    inset 0 0 18px rgba(255, 138, 30, 0.18);
+}
+.radar__spokes {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 138, 30, 0.14) 0deg 0.8deg, transparent 0.8deg 30deg);
+}
+.radar__sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg, rgba(255, 160, 60, 0.45) 0deg, transparent 70deg, transparent 360deg);
+  animation: radar-sweep 4.2s linear infinite;
+}
+@keyframes radar-sweep { to { transform: rotate(360deg); } }
+.radar__orb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ffd9a0 0%, #ff9d2e 40%, #b34d08 80%, #5e2403 100%);
+  box-shadow: 0 0 14px rgba(255, 138, 30, 0.8), 0 0 30px rgba(255, 138, 30, 0.35);
+  animation: orb-pulse 3.2s ease-in-out infinite;
+}
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+/* ----- Backlit jewel rockers (functional hologram keys) ----- */
+.rocker-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.rocker {
+  appearance: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--cream);
+  background: linear-gradient(180deg, #1d2733 0%, #121a23 100%);
+  border: 1px solid var(--ink-line);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  box-shadow: 0 3px 0 var(--ink-line), 0 4px 7px rgba(0, 0, 0, 0.5);
+  transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out);
+}
+/* the lit jewel inside the cap */
+.rocker i {
+  display: block;
+  width: 100%;
+  min-width: 44px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 45%), currentColor;
+  box-shadow: 0 0 9px currentColor, inset 0 0 4px rgba(0, 0, 0, 0.3);
+  opacity: 0.45;
+  transition: opacity 160ms;
+}
+.rocker--amber i { color: var(--console-org); }
+.rocker--cyan  i { color: var(--neo-cyan); }
+.rocker--green i { color: var(--crt-green); }
+.rocker--red   i { color: var(--console-red); }
+.rocker:hover i { opacity: 0.8; }
+.rocker:active,
+.rocker.is-pressed { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink-line), 0 2px 4px rgba(0, 0, 0, 0.5); }
+.rocker.is-active i { opacity: 1; }
+.rocker.is-active {
+  color: #fff;
+  text-shadow: 0 0 8px currentColor;
+}
+.rocker--soon { opacity: 0.7; }
+.rocker:focus-visible { outline: 2px solid var(--neo-cyan); outline-offset: 2px; }
+
+/* ----- Tiny decor button grid (Image 1's primary-color matrices) ----- */
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 10px);
+  gap: 4px;
+}
+.btn-grid b {
+  width: 10px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ece5d2, var(--cream-deep));
+  border: 1px solid var(--ink-line);
+  box-shadow: inset 0 -2px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.btn-grid .bg--red  { background: linear-gradient(180deg, #ff7a5c, var(--console-red)); }
+.btn-grid .bg--blue { background: linear-gradient(180deg, #7aa8ec, var(--console-blue)); }
+
+/* ----- Cream keyboard (Image 1's QWERTY, decorative) ----- */
+.keys { display: flex; flex-direction: column; gap: 3px; }
+.keys-row { display: flex; gap: 3px; }
+.keys-row b {
+  width: 15px;
+  height: 13px;
+  border-radius: 2.5px;
+  background: linear-gradient(180deg, #efe9d8 0%, var(--cream) 55%, var(--cream-deep) 100%);
+  border: 1px solid var(--ink-line);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.keys-row .kc--red    { background: linear-gradient(180deg, #ff8a6e, var(--console-red)); }
+.keys-row .kc--blue   { background: linear-gradient(180deg, #84b0f2, var(--console-blue)); }
+.keys-row .kc--orange { background: linear-gradient(180deg, #ffb35c, var(--console-org)); }
+.keys-row .kc--space  { width: 96px; }
+
+/* ----- Lever faders ----- */
+.fader-row { display: flex; gap: 14px; padding: 2px 4px; }
+.fader {
+  position: relative;
+  width: 8px;
+  height: 52px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #0a0e13, #1a222c);
+  border: 1px solid var(--ink-line);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.fader__lever {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--p, 0.5) * 70%);
+  width: 20px;
+  height: 11px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #cfd6dd 0%, #8d97a3 40%, #5a6470 100%);
+  border: 1px solid var(--ink-line);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.fader__lever::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 4.5px;
+  height: 1.5px;
+  background: rgba(10, 14, 19, 0.7);
+}
+
+/* ----- Mute lever ----- */
 .deck-switch {
   display: inline-flex;
   align-items: center;
@@ -361,10 +579,11 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
   width: 34px;
   height: 18px;
   border-radius: 999px;
-  background: #161d26;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #10161d;
+  border: 1px solid var(--ink-line);
   position: relative;
   transition: background 180ms;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 .deck-switch__lever::after {
   content: "";
@@ -387,49 +606,124 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 .deck-switch input:focus-visible + .deck-switch__lever { outline: 2px solid var(--neo-cyan); outline-offset: 2px; }
 .deck-switch__label {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.2em;
-  color: rgba(242, 245, 248, 0.6);
+  color: var(--cream);
+  opacity: 0.8;
 }
 
-/* Decorative sliders + lights. */
-.deck-slider {
-  width: 64px;
-  height: 6px;
-  border-radius: 3px;
-  background: #0d1219;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  position: relative;
+/* ----- Specimen dome keys ----- */
+.dome-key {
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--cream);
+  background: linear-gradient(180deg, #1d2733, #121a23);
+  border: 1px solid var(--ink-line);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  box-shadow: 0 3px 0 var(--ink-line), 0 4px 7px rgba(0, 0, 0, 0.5);
+  transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out);
 }
-.deck-slider__thumb {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--p, 0.5) * 100%);
-  transform: translate(-50%, -50%);
-  width: 10px;
-  height: 16px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #2c3744, #1a222c);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-}
-.deck-lights { display: flex; gap: 7px; margin-left: 4px; }
-.deck-light {
-  width: 7px;
-  height: 7px;
+.dome-key:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink-line); }
+.dome {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
+  flex: none;
+  opacity: 0.45;
+  transition: opacity 160ms;
 }
-.deck-light--amber { background: var(--neo-amber); box-shadow: 0 0 7px rgba(255, 179, 92, 0.7); }
-.deck-light--cyan  { background: var(--neo-cyan);  box-shadow: 0 0 7px rgba(79, 214, 224, 0.7); }
-.deck-light--blink { animation: deck-blink 2.4s steps(1) infinite; }
-@keyframes deck-blink { 50% { opacity: 0.25; } }
+.dome--amber { background: radial-gradient(circle at 35% 30%, #fff 0%, var(--console-org) 55%, #4a2403 100%); box-shadow: 0 0 9px var(--console-org); }
+.dome--cyan  { background: radial-gradient(circle at 35% 30%, #fff 0%, var(--neo-cyan) 55%, #093237 100%); box-shadow: 0 0 9px var(--neo-cyan); }
+.dome-key.is-active .dome { opacity: 1; animation: orb-pulse 2.6s ease-in-out infinite; }
+.dome-key.is-active { color: #fff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
+.dome-key:focus-visible { outline: 2px solid var(--neo-cyan); outline-offset: 2px; }
+
+/* ----- CRT readouts — green phosphor + scanlines ----- */
+.deck-module--crt { flex-direction: row; gap: 10px; align-items: center; }
+.crt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 76px;
+  padding: 7px 10px 8px;
+  border-radius: 4px;
+  background: radial-gradient(120% 110% at 50% 0%, #0c1408 0%, #050803 100%);
+  border: 2px solid #2e3d4d;
+  box-shadow:
+    0 0 0 1px var(--ink-line),
+    inset 0 0 10px rgba(57, 255, 20, 0.14);
+  overflow: hidden;
+}
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 3px);
+}
+.crt__label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: rgba(57, 255, 20, 0.55);
+}
+.crt__val {
+  font-family: "DSEG14 Classic", var(--font-mono);
+  font-size: 17px;
+  color: var(--crt-green);
+  text-shadow: 0 0 7px rgba(57, 255, 20, 0.7), 0 0 16px rgba(57, 255, 20, 0.3);
+}
+
+/* ----- EXIT — guarded red switch ----- */
+.exit-key {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: center;
+  margin-left: auto;
+  padding: 12px 18px 13px;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #ffd9d9;
+  background: linear-gradient(180deg, #4a1d22 0%, #2c1114 100%);
+  border: 1px solid var(--ink-line);
+  border-top-color: rgba(255, 120, 120, 0.4);
+  border-radius: 5px;
+  box-shadow: 0 3px 0 var(--ink-line), 0 4px 8px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 100, 100, 0.15);
+  transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out), text-shadow 200ms;
+}
+.exit-key__stripes {
+  width: 16px;
+  height: 22px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(-45deg, #e8b400 0 4px, #14110a 4px 8px);
+  border: 1px solid var(--ink-line);
+}
+.exit-key:hover { text-shadow: 0 0 10px rgba(255, 100, 100, 0.8); }
+.exit-key:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink-line); }
+.exit-key:focus-visible { outline: 2px solid var(--neo-cyan); outline-offset: 3px; }
 
 /* ----- Entrance: deck snaps up with 90s-anime overshoot ----- */
 .control-page.is-entering .deck {
   animation: deck-snap 650ms var(--ease-snap) 350ms both;
 }
 .control-page.is-entering .orbit-sign,
-.control-page.is-entering .control-header {
+.control-page.is-entering .control-header,
+.control-page.is-entering .data-col {
   animation: ctl-fade 500ms var(--ease-out) 700ms both;
 }
 @keyframes deck-snap {
@@ -440,7 +734,6 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
   0%   { opacity: 0; }
   100% { opacity: 1; }
 }
-/* Exit: deck drops away. */
 .control-page.is-exiting .deck { animation: deck-drop 420ms ease-in both; }
 @keyframes deck-drop {
   0%   { transform: translateY(0); }
@@ -448,16 +741,22 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
 }
 
 /* ----- Mobile: stacked, simplified ----- */
+@media (max-width: 1100px) {
+  .data-col { display: none; }
+}
+@media (max-width: 960px) {
+  .deck-module--keyboard, .deck__cable { display: none; }
+}
 @media (max-width: 760px) {
-  .deck { padding: 14px 14px 16px; max-height: 42vh; overflow-y: auto; }
-  .deck__inner { gap: 10px; }
-  .deck__cluster--decor { display: none; }
-  .deck__cluster--gauges { margin-left: 0; }
-  .deck-key { padding: 11px 12px 13px; font-size: 10.5px; }
+  .deck { padding: 18px 14px 4px; max-height: 46vh; overflow-y: auto; }
+  .deck__inner { gap: 8px; }
+  .deck-module--radar, .deck-module--faders .fader-row, .btn-grid { display: none; }
+  .deck-module { padding: 9px 10px 8px; }
   .holo { bottom: auto; top: 86px; max-height: 46vh; }
   .stage__hint { display: none; }
   .orbit-sign { display: none; }
-  .control-meta { display: none; }
+  .control-header .world-ticker { width: clamp(150px, 38vw, 240px); }
+  .exit-key { margin-left: 0; }
 }
 
 /* ----- Reduced motion ----- */
@@ -465,11 +764,17 @@ a.holo-list__val:hover, a.holo-list__val:focus-visible { color: var(--neo-amber)
   .control-page.is-entering .deck,
   .control-page.is-entering .orbit-sign,
   .control-page.is-entering .control-header,
+  .control-page.is-entering .data-col,
   .control-page.is-exiting .deck { animation: none; }
   .control-page.is-entering .control-flash,
   .control-page.is-exiting .control-flash { animation: none; opacity: 0; }
   .holo.is-open { animation: none; }
-  .holo__cursor, .deck-light--blink { animation: none; }
-  .orbit-sign { display: none; }
+  .holo__cursor { animation: none; }
+  .radar__sweep, .radar__orb, .dome-key.is-active .dome { animation: none; }
+  .orbit-sign, .data-col { display: none; }
   .control-bg-video { display: none; }
 }
+
+/* Contain each telemetry row so a text mutation repaints ~12px of
+ * glow, not the whole column. */
+.data-col__rows div { contain: layout paint; }

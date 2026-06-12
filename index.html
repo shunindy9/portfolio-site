@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061203" />
-  <link rel="stylesheet" href="css/info.css?v=2026061203" />
+  <link rel="stylesheet" href="css/style.css?v=2026061301" />
+  <link rel="stylesheet" href="css/info.css?v=2026061301" />
 
   <script>
     (function () {
@@ -37,6 +37,7 @@
   </video>
   <div class="info-bg-scrim" aria-hidden="true"></div>
   <div class="info-bg-lens"  aria-hidden="true"></div>
+  <div class="info-bg-lens-core" aria-hidden="true"></div>
   <div class="info-flash"    aria-hidden="true"></div>
 
   <a class="skip-link" href="#info-main">Skip to content</a>
@@ -57,7 +58,12 @@
       </a>
     </div>
     <div class="info-header__right">
-      <span class="info-meta"><span class="info-meta__city">TOKYO</span> · <time class="info-meta__clock jst-clock">—</time> JST</span>
+      <div class="info-meta world-ticker" aria-label="World clocks">
+        <div class="world-ticker__belt">
+          <span class="world-ticker__seq" data-ticker-seq>TOKYO --:--</span>
+          <span class="world-ticker__seq" data-ticker-seq aria-hidden="true">TOKYO --:--</span>
+        </div>
+      </div>
       <div class="lang-toggle" role="group" aria-label="Switch site language" data-state="en">
         <span class="lang-toggle__indicator" aria-hidden="true"></span>
         <button type="button" class="lang-toggle__btn" data-lang="ja" aria-pressed="false">
@@ -281,7 +287,7 @@
     <p>© <span id="info-year">—</span> Shunsuke Otsuki — <span data-bind="credit">Designed &amp; built in Tokyo.</span></p>
   </footer>
 
-  <script defer src="js/config.js?v=2026061203"></script>
-  <script defer src="js/info.js?v=2026061203"></script>
+  <script defer src="js/config.js?v=2026061301"></script>
+  <script defer src="js/info.js?v=2026061301"></script>
 </body>
 </html>

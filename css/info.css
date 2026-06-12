@@ -1,20 +1,4 @@
 /* ===========================================================================
- * Self-hosted DSEG14 Classic Bold digital-clock face (SIL OFL).
- * Source: github.com/keshikan/DSEG v0.46. Only DSEG14 is shipped —
- * DSEG7 was tried first but its 7-segment letters read as encrypted
- * for non-numeric text. Latin-only via unicode-range so JP characters
- * fall through to Noto Sans JP. */
-@font-face {
-  font-family: "DSEG14 Classic";
-  src: url("../assets/fonts/DSEG14Classic-Bold.woff2") format("woff2"),
-       url("../assets/fonts/DSEG14Classic-Bold.ttf")   format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0020-007E, U+00A0-00FF;
-}
-
-/* ===========================================================================
  * INFO PAGE — minimal, polished. Borrows tokens from style.css. The vibe:
  * lots of vertical air, name large in the middle, monospace meta, simple
  * fade-up reveal on scroll. Same shader background as the main site,
@@ -102,23 +86,45 @@
   pointer-events: none;
   background:
     radial-gradient(
-      circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      circle 165px at var(--mouse-x, 50%) var(--mouse-y, 50%),
       rgba(4, 6, 10, 0.42) 0%,
       rgba(4, 6, 10, 0.26) 45%,
       transparent 70%
     ),
     radial-gradient(
-      circle 330px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      circle 185px at var(--mouse-x, 50%) var(--mouse-y, 50%),
       transparent 62%,
-      rgba(255, 179, 92, 0.18) 68%,
-      rgba(255, 20, 212, 0.10) 72%,
-      rgba(79, 214, 224, 0.16) 76%,
+      rgba(255, 179, 92, 0.20) 68%,
+      rgba(255, 20, 212, 0.12) 72%,
+      rgba(79, 214, 224, 0.18) 76%,
       transparent 82%
     );
   /* No transition on background — same reason as the video filter. */
 }
+
+/* Lens core — a soft color bloom in the middle of the ring that cycles
+ * through the spectrum over time. A small (110px) element moved with
+ * transform from the same rAF as the lens, so the hue-rotate animation
+ * runs on a tiny compositor layer, never the full viewport. */
+.info-bg-lens-core {
+  position: fixed;
+  top: -55px;
+  left: -55px;
+  width: 110px;
+  height: 110px;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 80, 60, 0.50) 0%, rgba(255, 80, 60, 0.18) 45%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: lens-hue-cycle 9s linear infinite;
+  will-change: transform, filter;
+}
+@keyframes lens-hue-cycle {
+  to { filter: hue-rotate(360deg); }
+}
 @media (hover: none), (prefers-reduced-motion: reduce) {
-  .info-bg-lens { display: none; }
+  .info-bg-lens, .info-bg-lens-core { display: none; }
 }
 
 /* Flash from below — fires when the user reaches the end of the scroll.
@@ -318,13 +324,44 @@ body.is-pulsing .info-bg-video {
 
 /* Values stay in the body face for readability — DSEG14's segmented
  * glyphs garble long alphanumeric like email addresses. */
+/* Tagline — an old neon sign: warm yellow tubes that mostly hold steady
+ * but dip and stutter like a tired transformer. The flicker keyframes are
+ * deliberately irregular (long stable stretches, short double-dips). */
 .info-tagline {
   font-family: var(--font-body);
   font-size: clamp(19px, 1.2vw + 13px, 24px);
-  color: var(--ink);
+  color: var(--analog-yellow);
   margin: 0 auto;
   max-width: 34ch;
   line-height: 1.55;
+  text-shadow:
+    0 0 4px  var(--analog-yellow-glow),
+    0 0 12px var(--analog-yellow-glow),
+    0 0 30px var(--analog-yellow-glow-2),
+    0 0 55px rgba(255, 179, 92, 0.18);
+  animation: neon-vintage 7.5s linear infinite;
+}
+@keyframes neon-vintage {
+  0%, 100% { opacity: 1; }
+  3.2%  { opacity: 1; }
+  3.6%  { opacity: 0.55; }
+  4.0%  { opacity: 0.95; }
+  4.4%  { opacity: 0.62; }
+  4.9%  { opacity: 1; }
+  37%   { opacity: 1; }
+  37.4% { opacity: 0.7; }
+  37.8% { opacity: 1; }
+  68%   { opacity: 1; }
+  68.3% { opacity: 0.5; }
+  68.7% { opacity: 0.92; }
+  69.4% { opacity: 0.68; }
+  70%   { opacity: 1; }
+  86%   { opacity: 1; }
+  86.4% { opacity: 0.85; }
+  86.8% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-tagline { animation: none; }
 }
 
 /* ----- Direct-action CTA row ----- */
@@ -431,7 +468,7 @@ body.is-pulsing .info-bg-video {
   margin: 0 0 22px;
 }
 .info-prose {
-  font-family: var(--font-body);
+  font-family: "Axzer Sports", var(--font-body);
   font-size: clamp(18px, 1vw + 13px, 21px);
   line-height: 1.65;
   color: var(--ink);
@@ -462,7 +499,7 @@ body.is-pulsing .info-bg-video {
   color: var(--analog-yellow);
 }
 .info-list__val {
-  font-family: var(--font-body);
+  font-family: "Axzer Sports", var(--font-body);
   font-size: 20px;
   color: var(--ink);
 }
@@ -498,7 +535,7 @@ body.is-pulsing .info-bg-video {
 }
 .info-links li a {
   display: inline-block;
-  font-family: var(--font-body);
+  font-family: "Axzer Sports", var(--font-body);
   font-size: 20px;
   color: var(--ink);
   position: relative;
@@ -633,7 +670,7 @@ body.is-pulsing .info-bg-video {
   color: var(--analog-yellow);
 }
 .info-cap__title {
-  font-family: var(--font-body);
+  font-family: "Axzer Sports", var(--font-body);
   font-weight: 500;
   font-size: clamp(19px, 1.4vw, 23px);
   line-height: 1.3;
@@ -641,7 +678,7 @@ body.is-pulsing .info-bg-video {
   margin: 12px 0 12px;
 }
 .info-cap__note {
-  font-family: var(--font-body);
+  font-family: "Axzer Sports", var(--font-body);
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink);
@@ -720,7 +757,6 @@ body.is-pulsing .info-bg-video {
 }
 
 /* Body tier — dark legibility shadow under off-white copy. */
-.info-tagline,
 .info-prose,
 .info-list__val,
 .info-cap__note,
@@ -759,7 +795,6 @@ body.is-pulsing .info-bg-video {
   --analog-yellow-glow-2: rgba(184, 119, 10, 0.14);
   --analog-yellow-edge:   rgba(140,  90,  6, 0.45);
 }
-:root[data-theme="light"] .info-tagline,
 :root[data-theme="light"] .info-prose,
 :root[data-theme="light"] .info-list__val,
 :root[data-theme="light"] .info-cap__note,
@@ -781,3 +816,26 @@ body.is-pulsing .info-bg-video {
      1px 0 2px  rgba(79, 214, 224, 0.30),
     -1px 0 2px  rgba(79, 214, 224, 0.22);
 }
+
+/* ===========================================================================
+ * JAPANESE MODE TYPOGRAPHY — Electroharmonix. Latin fragments (numbers,
+ * "TOKYO", acronyms) render in the faux-katakana display face while real
+ * kana/kanji fall through to Noto Sans JP per-glyph via unicode-range.
+ * The DSEG name + clock digits keep their instrument identity.
+ * ======================================================================== */
+:lang(ja) .info-eyebrow,
+:lang(ja) .info-tagline,
+:lang(ja) .info-block__label,
+:lang(ja) .info-list__key,
+:lang(ja) .info-list__val,
+:lang(ja) .info-prose,
+:lang(ja) .info-cap__title,
+:lang(ja) .info-cap__note,
+:lang(ja) .info-cap__num,
+:lang(ja) .info-back,
+:lang(ja) .info-cta__label,
+:lang(ja) .info-links li a,
+:lang(ja) .info-footer p {
+  font-family: "Electroharmonix", var(--font-jp), sans-serif;
+}
+

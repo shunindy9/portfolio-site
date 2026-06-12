@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061203" />
-  <link rel="stylesheet" href="css/control.css?v=2026061203" />
+  <link rel="stylesheet" href="css/style.css?v=2026061301" />
+  <link rel="stylesheet" href="css/control.css?v=2026061301" />
 
   <!-- The cockpit is always dark — a spaceship at night. -->
   <script>document.documentElement.setAttribute("data-theme", "dark");</script>
@@ -32,8 +32,9 @@
 </head>
 <body class="control-page">
 
-  <!-- Space outside the windshield — same loop as the home page, heavier
-       scrim so the holograms own the light. -->
+  <!-- Space outside the windshield — same loop as the home page, crushed
+       almost to black so the specimen lab owns the light (Image 3:
+       pure black field). -->
   <video class="control-bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
     <source src="assets/video/hj-bg.mp4?v=20260610b" type="video/mp4" />
   </video>
@@ -52,27 +53,46 @@
       </svg>
       <span class="control-btn__label">Exit</span>
     </a>
-    <span class="control-meta"><span aria-hidden="true">⌖</span> ORBIT — TOKYO · <time class="jst-clock">--:--</time> JST</span>
+    <div class="control-meta world-ticker" aria-label="World clocks">
+      <div class="world-ticker__belt">
+        <span class="world-ticker__seq" data-ticker-seq>TOKYO --:--</span>
+        <span class="world-ticker__seq" data-ticker-seq aria-hidden="true">TOKYO --:--</span>
+      </div>
+    </div>
   </header>
 
-  <!-- ====================== HOLOGRAM STAGE ======================
-       The Three.js canvas hosts the spinnable wireframe planet/visitor.
-       DOM hologram panels project over it when deck keys are pressed. -->
-  <main class="stage" aria-label="Hologram stage">
+  <!-- ====================== SPECIMEN LAB STAGE ======================
+       Image-3 hologram: a cyan wireframe lattice with stacked strata
+       (clouds / greenery / grids / water) and the current specimen
+       (planet or visitor) suspended inside. Flanked by glowing data
+       columns, all on a near-black field. -->
+  <main class="stage" aria-label="Specimen lab">
     <canvas id="scene-canvas" aria-hidden="true"></canvas>
 
-    <!-- No-WebGL fallback: a static wireframe planet (SVG) so the page
-         still reads as a cockpit; all information lives in DOM panels. -->
+    <!-- No-WebGL fallback: a static wireframe lattice (SVG) so the page
+         still reads as a lab; all information lives in DOM panels. -->
     <div class="stage__fallback" hidden aria-hidden="true">
-      <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1">
-        <circle cx="100" cy="100" r="64"/>
-        <ellipse cx="100" cy="100" rx="26" ry="64"/>
-        <ellipse cx="100" cy="100" rx="64" ry="22"/>
-        <ellipse cx="100" cy="100" rx="92" ry="26" transform="rotate(-18 100 100)"/>
+      <svg viewBox="0 0 200 280" fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="40" y="20" width="120" height="240"/>
+        <path d="M40 20 60 6h120l-20 14M180 6v226l-20 28M60 6v228"/>
+        <path d="M40 90h120M40 130h120M40 170h120M40 215h120" opacity="0.6"/>
+        <circle cx="100" cy="62" r="22" opacity="0.9"/>
+        <ellipse cx="100" cy="62" rx="34" ry="9" opacity="0.7"/>
       </svg>
     </div>
 
-    <p class="stage__hint" id="stage-hint">DRAG TO SPIN · SCROLL TO ZOOM</p>
+    <!-- Flanking data columns — green telemetry left, amber right
+         (Image 3's glowing terminal text). Populated + scrambled by JS. -->
+    <div class="data-col data-col--left" aria-hidden="true"></div>
+    <div class="data-col data-col--right" aria-hidden="true">
+      <div class="data-col__thumbs">
+        <span class="data-thumb data-thumb--galaxy"></span>
+        <span class="data-thumb data-thumb--grid"></span>
+        <span class="data-thumb data-thumb--terrain"></span>
+      </div>
+    </div>
+
+    <p class="stage__hint" id="stage-hint">DRAG TO SPIN · SCROLL TO ZOOM · SPECIMEN CHAMBER ACTIVE</p>
 
     <!-- Hologram panels — liquid glass, one open at a time. -->
     <section class="holo glass" id="holo" hidden aria-live="polite">
@@ -142,22 +162,66 @@
     </svg>
   </div>
 
-  <!-- ====================== CONTROL DECK ====================== -->
+  <!-- ====================== CONTROL DECK ======================
+       Mœbius layout (radar scope, gridded buttons, cream keyboard,
+       lever faders, dense modules) rendered with Syd Mead materials
+       (brushed metal, walnut bullnose, backlit jewel keys, grain). -->
   <section class="deck" id="deck" aria-label="Control deck">
-    <div class="deck__rail" aria-hidden="true"></div>
+    <div class="deck__cable" aria-hidden="true">
+      <svg viewBox="0 0 1200 40" preserveAspectRatio="none">
+        <path d="M0 30 C 140 6, 240 38, 380 18 S 640 4, 780 24 S 1060 36, 1200 12" fill="none" stroke="#FF8A1E" stroke-width="2.5" opacity="0.7"/>
+        <path d="M0 14 C 160 34, 300 8, 470 28 S 760 38, 920 10 S 1100 22, 1200 30" fill="none" stroke="#1a222c" stroke-width="3" opacity="0.8"/>
+      </svg>
+    </div>
+    <div class="deck__indicator" aria-hidden="true"></div>
+    <div class="deck__grain" aria-hidden="true"></div>
 
     <div class="deck__inner">
-      <div class="deck__cluster deck__cluster--holo" role="group" aria-label="Hologram keys">
-        <button class="deck-key" type="button" data-holo="contact">CONTACT</button>
-        <button class="deck-key" type="button" data-holo="services">SERVICES</button>
-        <button class="deck-key" type="button" data-holo="system">SYSTEM</button>
-        <button class="deck-key deck-key--soon" type="button" data-holo="work">WORK</button>
-        <button class="deck-key deck-key--soon" type="button" data-holo="music">MUSIC</button>
+
+      <!-- LEFT BAY — orange-sphere radar scope (Image 1's hero) -->
+      <div class="deck-module deck-module--radar" aria-hidden="true">
+        <div class="radar">
+          <div class="radar__spokes"></div>
+          <div class="radar__sweep"></div>
+          <div class="radar__orb"></div>
+        </div>
+        <span class="deck-module__tag">ORB SCOPE</span>
       </div>
 
-      <div class="deck__cluster deck__cluster--scene" role="group" aria-label="Hologram objects">
-        <button class="deck-key deck-key--cyan is-active" type="button" data-scene="planet">PLANET</button>
-        <button class="deck-key deck-key--cyan" type="button" data-scene="visitor">VISITOR</button>
+      <!-- HOLOGRAM BUS — backlit jewel rockers (the functional keys) -->
+      <div class="deck-module deck-module--keys" role="group" aria-label="Hologram keys">
+        <span class="deck-module__tag">HOLOGRAM BUS</span>
+        <div class="rocker-row">
+          <button class="rocker rocker--amber" type="button" data-holo="contact"><i aria-hidden="true"></i>CONTACT</button>
+          <button class="rocker rocker--cyan"  type="button" data-holo="services"><i aria-hidden="true"></i>SERVICES</button>
+          <button class="rocker rocker--green" type="button" data-holo="system"><i aria-hidden="true"></i>SYSTEM</button>
+          <button class="rocker rocker--red rocker--soon" type="button" data-holo="work"><i aria-hidden="true"></i>WORK</button>
+          <button class="rocker rocker--red rocker--soon" type="button" data-holo="music"><i aria-hidden="true"></i>MUSIC</button>
+        </div>
+        <div class="btn-grid" aria-hidden="true">
+          <b class="bg--red"></b><b></b><b class="bg--blue"></b><b></b><b class="bg--red"></b><b></b><b class="bg--blue"></b><b class="bg--red"></b><b></b>
+          <b></b><b class="bg--blue"></b><b></b><b class="bg--red"></b><b></b><b class="bg--blue"></b><b></b><b></b><b class="bg--red"></b>
+        </div>
+      </div>
+
+      <!-- CREAM KEYBOARD — decorative, straight out of Image 1 -->
+      <div class="deck-module deck-module--keyboard" aria-hidden="true">
+        <span class="deck-module__tag">INPUT</span>
+        <div class="keys">
+          <div class="keys-row"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+          <div class="keys-row"><b></b><b></b><b class="kc--red"></b><b></b><b></b><b></b><b></b><b></b><b class="kc--blue"></b><b></b><b></b><b></b><b></b></div>
+          <div class="keys-row"><b></b><b></b><b></b><b class="kc--space"></b><b></b><b class="kc--orange"></b><b></b></div>
+        </div>
+      </div>
+
+      <!-- AUX — lever faders + mute lever -->
+      <div class="deck-module deck-module--faders" role="group" aria-label="Audio">
+        <span class="deck-module__tag">AUX</span>
+        <div class="fader-row">
+          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.78"></span></span>
+          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.42"></span></span>
+          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.6"></span></span>
+        </div>
         <label class="deck-switch" for="mute-switch">
           <input type="checkbox" id="mute-switch" />
           <span class="deck-switch__lever" aria-hidden="true"></span>
@@ -165,27 +229,30 @@
         </label>
       </div>
 
-      <div class="deck__cluster deck__cluster--decor" aria-hidden="true">
-        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.72"></span></div>
-        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.35"></span></div>
-        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.55"></span></div>
-        <div class="deck-lights">
-          <span class="deck-light deck-light--amber"></span>
-          <span class="deck-light deck-light--cyan"></span>
-          <span class="deck-light deck-light--amber deck-light--blink"></span>
-        </div>
+      <!-- SPECIMEN — glossy dome keys swap the entity in the lattice -->
+      <div class="deck-module deck-module--scene" role="group" aria-label="Specimen selection">
+        <span class="deck-module__tag">SPECIMEN</span>
+        <button class="dome-key is-active" type="button" data-scene="planet"><span class="dome dome--amber" aria-hidden="true"></span>PLANET</button>
+        <button class="dome-key" type="button" data-scene="visitor"><span class="dome dome--cyan" aria-hidden="true"></span>VISITOR</button>
       </div>
 
-      <div class="deck__cluster deck__cluster--gauges" role="group" aria-label="Live readouts">
-        <div class="gauge"><span class="gauge__label">JST</span><span class="gauge__value jst-clock">--:--</span></div>
-        <div class="gauge"><span class="gauge__label">TOKYO</span><span class="gauge__value" id="deck-temp">—°</span></div>
+      <!-- CRT READOUTS — green phosphor, scanlined -->
+      <div class="deck-module deck-module--crt" role="group" aria-label="Live readouts">
+        <div class="crt"><span class="crt__label">JST</span><span class="crt__val jst-clock">--:--</span></div>
+        <div class="crt"><span class="crt__label">TOKYO</span><span class="crt__val" id="deck-temp">—°</span></div>
       </div>
 
-      <a class="deck-key deck-key--exit" href="index.html" id="exit-key">EXIT</a>
+      <!-- EXIT — guarded red switch -->
+      <a class="exit-key" href="index.html" id="exit-key">
+        <span class="exit-key__stripes" aria-hidden="true"></span>
+        EXIT
+      </a>
     </div>
+
+    <div class="deck__walnut" aria-hidden="true"></div>
   </section>
 
-  <script defer src="js/config.js?v=2026061203"></script>
-  <script type="module" src="js/control.js?v=2026061203"></script>
+  <script defer src="js/config.js?v=2026061301"></script>
+  <script type="module" src="js/control.js?v=2026061301"></script>
 </body>
 </html>

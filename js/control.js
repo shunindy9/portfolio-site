@@ -1,8 +1,8 @@
 /* CONTROL deck — cockpit logic. ES module (control.html loads it with
  * type="module" + an importmap for Three.js). Sections:
- *   entrance/exit transitions · deck keys + holograms · i18n-lite ·
- *   JST clocks · Open-Meteo gauges · Web Audio (whoosh/clicks/mute) ·
- *   Three.js wireframe planet + visitor with no-WebGL fallback. */
+ *   i18n-lite · audio · entrance/exit · deck keys + holograms ·
+ *   clocks + world ticker · Open-Meteo gauges · data columns ·
+ *   Three.js SPECIMEN LAB (Image-3 lattice + strata + entity). */
 
 const CONFIG = window.SITE_CONFIG || {};
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -169,13 +169,13 @@ q("#holo-close").addEventListener("click", () => { keyClick(380); hideHolo(); })
 window.addEventListener("keydown", (e) => { if (e.key === "Escape" && openPane) hideHolo(); });
 
 /* ----------------------------------------------------------------
- * CLOCKS — deck/header HH:MM every 30s; SYSTEM pane HH:MM:SS at 1s
- * only while that pane is open.
+ * CLOCKS — deck CRTs HH:MM every 30s; the world ticker re-renders on
+ * the same beat (its slide is pure CSS); SYSTEM pane gets seconds.
  * ---------------------------------------------------------------- */
-function jst(showSeconds) {
+function cityTime(tz, showSeconds) {
   try {
     return new Date().toLocaleTimeString("en-GB", {
-      timeZone: "Asia/Tokyo",
+      timeZone: tz,
       hour12: false,
       hour: "2-digit",
       minute: "2-digit",
@@ -183,7 +183,28 @@ function jst(showSeconds) {
     });
   } catch (_) { return showSeconds ? "--:--:--" : "--:--"; }
 }
-function tickMinutes() { qa(".jst-clock").forEach((el) => { el.textContent = jst(false); }); }
+const TICKER_CITIES = [
+  ["TOKYO",       "Asia/Tokyo"],
+  ["LOS ANGELES", "America/Los_Angeles"],
+  ["NEW YORK",    "America/New_York"],
+  ["LONDON",      "Europe/London"],
+  ["PARIS",       "Europe/Paris"],
+  ["BERLIN",      "Europe/Berlin"],
+  ["DUBAI",       "Asia/Dubai"],
+  ["SINGAPORE",   "Asia/Singapore"],
+  ["SYDNEY",      "Australia/Sydney"]
+];
+const tickerSeqs = qa("[data-ticker-seq]");
+function tickMinutes() {
+  const t = cityTime("Asia/Tokyo");
+  qa(".jst-clock").forEach((el) => { el.textContent = t; });
+  if (tickerSeqs.length) {
+    const html = TICKER_CITIES.map((c) =>
+      `<span class="tick-city">${c[0]}</span> ${cityTime(c[1])}`
+    ).join("  ·  ") + "  ·  ";
+    tickerSeqs.forEach((el) => { el.innerHTML = html; });
+  }
+}
 tickMinutes();
 setInterval(tickMinutes, 30000);
 
@@ -191,7 +212,7 @@ let secTimer = null;
 function startSecondsClock() {
   if (secTimer) return;
   const els = qa(".jst-clock-s");
-  const tick = () => els.forEach((el) => { el.textContent = jst(true); });
+  const tick = () => els.forEach((el) => { el.textContent = cityTime("Asia/Tokyo", true); });
   tick();
   secTimer = setInterval(tick, 1000);
 }
@@ -200,8 +221,7 @@ function stopSecondsClock() {
 }
 
 /* ----------------------------------------------------------------
- * WEATHER — Open-Meteo, Tokyo, no API key. Cached 10 minutes in
- * sessionStorage so deck re-entries don't refetch.
+ * WEATHER — Open-Meteo, Tokyo, no API key. Cached 10 minutes.
  * ---------------------------------------------------------------- */
 const WMO = {
   0: "CLEAR", 1: "MOSTLY CLEAR", 2: "PARTLY CLOUDY", 3: "OVERCAST",
@@ -245,10 +265,59 @@ async function loadWeather() {
 loadWeather();
 
 /* ----------------------------------------------------------------
- * THREE.JS — wireframe planet + visitor. Dynamically imported after
- * the entrance snap so module parsing never fights the animation.
- * OrbitControls: drag to spin, wheel/pinch to zoom. Pauses when the
- * tab is hidden. Full DOM fallback if WebGL is unavailable.
+ * DATA COLUMNS — Image 3's flanking terminal text. Pre-render rows
+ * of glyph noise, then mutate a couple of rows on a slow interval
+ * (8Hz would be churn; 3.5Hz reads "telemetry"). Paused when hidden.
+ * ---------------------------------------------------------------- */
+const GLYPHS = "アイウエオカキクケコサシスセソ0123456789#%&*+-=◇◆▲▼■□:.｜";
+function glyphRow(len) {
+  let s = "";
+  for (let i = 0; i < len; i++) {
+    s += Math.random() < 0.16 ? " " : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+  }
+  return s;
+}
+function initDataCols() {
+  const cols = [q(".data-col--left"), q(".data-col--right")];
+  if (!cols[0] || reduceMotion) return;
+  const ROWS = 30;
+  const stores = cols.map((col) => {
+    const wrap = document.createElement("div");
+    wrap.className = "data-col__rows";
+    const rows = [];
+    for (let i = 0; i < ROWS; i++) {
+      const r = document.createElement("div");
+      r.textContent = glyphRow(8 + ((Math.random() * 9) | 0));
+      wrap.appendChild(r);
+      rows.push(r);
+    }
+    col.prepend(wrap);
+    return rows;
+  });
+  // One row per column per tick at ~2.5Hz — telemetry feel without
+  // measurable frame-time spikes (2 rows @ 3.5Hz pushed p95 to 13ms).
+  let timer = setInterval(mutate, 400);
+  function mutate() {
+    stores.forEach((rows) => {
+      const r = rows[(Math.random() * rows.length) | 0];
+      r.textContent = glyphRow(8 + ((Math.random() * 9) | 0));
+    });
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { clearInterval(timer); timer = null; }
+    else if (!timer) { timer = setInterval(mutate, 400); }
+  });
+}
+initDataCols();
+
+/* ----------------------------------------------------------------
+ * THREE.JS — the SPECIMEN LAB (Image 3). A tall cyan wireframe
+ * lattice with stacked strata: cloud points up top, greenery points,
+ * a green grid plane, an orange grid plane, and a blue water plane
+ * with rock clusters at the bottom. The current specimen (planet or
+ * visitor) hovers inside the chamber. OrbitControls for drag/zoom,
+ * subtle pointer parallax on the lab group (pacomepertant feel),
+ * paused when the tab is hidden, DOM fallback when WebGL is missing.
  * ---------------------------------------------------------------- */
 const canvas = q("#scene-canvas");
 
@@ -283,74 +352,170 @@ async function initScene() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.set(0, 0.4, 6);
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.set(0, 0.4, 8.4);
 
-  const AMBER = 0xffb35c;
-  const CYAN  = 0x4fd6e0;
+  const CYAN   = 0x4fd6e0;
+  const GREEN  = 0x46ff5a;
+  const ORANGE = 0xff8a1e;
+  const BLUE   = 0x3b7bd6;
+  const AMBER  = 0xffb35c;
+  const WHITE  = 0xf2f5f8;
+
   const wire = (color, opacity = 0.85) =>
     new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity });
+  const lineMat = (color, opacity) =>
+    new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+  const pointsMat = (color, size, opacity = 0.9) =>
+    new THREE.PointsMaterial({ color, size, transparent: true, opacity, sizeAttenuation: true });
 
-  /* PLANET — icosahedron globe + tilted ring + small moon. */
+  function pointCloud(count, color, size, spread, center, opacity) {
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3]     = center[0] + (Math.random() - 0.5) * spread[0];
+      pos[i * 3 + 1] = center[1] + (Math.random() - 0.5) * spread[1];
+      pos[i * 3 + 2] = center[2] + (Math.random() - 0.5) * spread[2];
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    return new THREE.Points(geo, pointsMat(color, size, opacity));
+  }
+
+  /* --- The lab group (everything parallaxes together) --- */
+  const lab = new THREE.Group();
+  scene.add(lab);
+
+  /* Lattice — tall wireframe chamber, Image 3's cyan cage. */
+  const W = 3.4, H = 5.4, D = 3.4;
+  const lattice = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(W, H, D)),
+    lineMat(CYAN, 0.55)
+  );
+  lab.add(lattice);
+  // Inner vertical rails — extra cage lines so it reads as scaffold.
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      const rail = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(W * 0.66, H, D * 0.66)),
+        lineMat(CYAN, 0.18)
+      );
+      lab.add(rail);
+      break; // one inner cage is enough
+    }
+    break;
+  }
+
+  /* Strata, top → bottom (Image 3): clouds / greenery / green grid /
+     orange grid / water + rocks. */
+  const clouds = new THREE.Group();
+  clouds.add(pointCloud(160, WHITE, 0.075, [2.2, 0.5, 1.8], [-0.3, 0, 0], 0.85));
+  clouds.add(pointCloud(110, WHITE, 0.06,  [1.6, 0.4, 1.4], [0.8, 0.18, 0.3], 0.7));
+  clouds.position.y = 1.95;
+  lab.add(clouds);
+
+  const greenery = pointCloud(320, GREEN, 0.05, [2.8, 0.5, 2.8], [0, 0, 0], 0.85);
+  greenery.position.y = 0.85;
+  lab.add(greenery);
+
+  const gridGreen = new THREE.GridHelper(W * 0.94, 16, GREEN, GREEN);
+  gridGreen.material.transparent = true;
+  gridGreen.material.opacity = 0.45;
+  gridGreen.position.y = 0.35;
+  lab.add(gridGreen);
+
+  const gridOrange = new THREE.GridHelper(W * 0.94, 16, ORANGE, ORANGE);
+  gridOrange.material.transparent = true;
+  gridOrange.material.opacity = 0.4;
+  gridOrange.position.y = -0.5;
+  lab.add(gridOrange);
+
+  const water = new THREE.Group();
+  const gridWater = new THREE.GridHelper(W * 0.94, 12, BLUE, BLUE);
+  gridWater.material.transparent = true;
+  gridWater.material.opacity = 0.5;
+  water.add(gridWater);
+  water.add(pointCloud(240, BLUE, 0.045, [3.0, 0.35, 3.0], [0, -0.15, 0], 0.8));
+  for (const rx of [-0.9, 0.5, 1.1]) {
+    const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22 + Math.random() * 0.12, 0), wire(0x6b86c8, 0.65));
+    rock.position.set(rx, -0.1, (Math.random() - 0.5) * 1.6);
+    water.add(rock);
+  }
+  water.position.y = -1.75;
+  lab.add(water);
+
+  /* --- Specimens — materialized inside the chamber --- */
   const planet = new THREE.Group();
-  planet.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1.55, 2), wire(AMBER)));
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.45, 0.02, 6, 80), wire(CYAN, 0.7));
+  planet.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.72, 2), wire(AMBER)));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.14, 0.014, 6, 70), wire(CYAN, 0.7));
   ring.rotation.x = Math.PI / 2.4;
   ring.rotation.y = 0.25;
   planet.add(ring);
   const moonPivot = new THREE.Group();
-  const moon = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22, 1), wire(CYAN, 0.9));
-  moon.position.set(3.1, 0.4, 0);
+  const moon = new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 1), wire(CYAN, 0.9));
+  moon.position.set(1.45, 0.2, 0);
   moonPivot.add(moon);
   planet.add(moonPivot);
-  scene.add(planet);
+  planet.position.y = 1.42;
 
-  /* VISITOR — a friendly wireframe alien from primitives. */
   const visitor = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.78, 14, 12), wire(CYAN));
-  head.scale.set(1, 1.25, 0.95);
-  head.position.y = 1.25;
-  visitor.add(head);
-  const eyeGeo = new THREE.SphereGeometry(0.21, 10, 8);
-  for (const sx of [-1, 1]) {
-    const eye = new THREE.Mesh(eyeGeo, wire(AMBER, 1));
-    eye.position.set(sx * 0.34, 1.3, 0.62);
-    eye.scale.set(1, 1.6, 0.6);
-    eye.rotation.z = sx * -0.35;
-    visitor.add(eye);
+  {
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 14, 12), wire(CYAN));
+    head.scale.set(1, 1.25, 0.95);
+    head.position.y = 0.62;
+    visitor.add(head);
+    const eyeGeo = new THREE.SphereGeometry(0.105, 10, 8);
+    for (const sx of [-1, 1]) {
+      const eye = new THREE.Mesh(eyeGeo, wire(AMBER, 1));
+      eye.position.set(sx * 0.17, 0.65, 0.32);
+      eye.scale.set(1, 1.6, 0.6);
+      eye.rotation.z = sx * -0.35;
+      visitor.add(eye);
+    }
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.27, 0.74, 10, 3), wire(CYAN, 0.8));
+    body.position.y = -0.04;
+    visitor.add(body);
+    const limbGeo = new THREE.CylinderGeometry(0.035, 0.026, 0.56, 6, 2);
+    for (const sx of [-1, 1]) {
+      const arm = new THREE.Mesh(limbGeo, wire(CYAN, 0.8));
+      arm.position.set(sx * 0.31, 0.1, 0);
+      arm.rotation.z = sx * 0.5;
+      visitor.add(arm);
+      const leg = new THREE.Mesh(limbGeo, wire(CYAN, 0.8));
+      leg.position.set(sx * 0.11, -0.66, 0);
+      leg.rotation.z = sx * 0.08;
+      visitor.add(leg);
+    }
+    const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.3, 5), wire(AMBER, 0.9));
+    antenna.position.y = 1.18;
+    visitor.add(antenna);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), wire(AMBER, 1));
+    tip.position.y = 1.34;
+    visitor.add(tip);
   }
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.52, 1.45, 10, 3), wire(CYAN, 0.8));
-  body.position.y = -0.05;
-  visitor.add(body);
-  const limbGeo = new THREE.CylinderGeometry(0.07, 0.05, 1.1, 6, 2);
-  for (const sx of [-1, 1]) {
-    const arm = new THREE.Mesh(limbGeo, wire(CYAN, 0.8));
-    arm.position.set(sx * 0.62, 0.18, 0);
-    arm.rotation.z = sx * 0.5;
-    visitor.add(arm);
-    const leg = new THREE.Mesh(limbGeo, wire(CYAN, 0.8));
-    leg.position.set(sx * 0.22, -1.3, 0);
-    leg.rotation.z = sx * 0.08;
-    visitor.add(leg);
-  }
-  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.6, 5), wire(AMBER, 0.9));
-  antenna.position.y = 2.35;
-  visitor.add(antenna);
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), wire(AMBER, 1));
-  tip.position.y = 2.68;
-  visitor.add(tip);
+  visitor.position.y = 1.35;
   visitor.visible = false;
-  visitor.position.y = 0.1;
-  scene.add(visitor);
+
+  lab.add(planet);
+  lab.add(visitor);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
   controls.enablePan = false;
-  controls.minDistance = 3;
-  controls.maxDistance = 10;
+  controls.minDistance = 4;
+  controls.maxDistance = 13;
   controls.autoRotate = !reduceMotion;
-  controls.autoRotateSpeed = 0.8;
+  controls.autoRotateSpeed = 0.5;
+
+  /* Pointer parallax — the lab leans gently toward the cursor
+   * (pacomepertant look-around), independent of OrbitControls. */
+  let targetRX = 0, targetRZ = 0;
+  if (!reduceMotion) {
+    window.addEventListener("pointermove", (e) => {
+      targetRZ = ((e.clientX / window.innerWidth) - 0.5) * 0.08;
+      targetRX = ((e.clientY / window.innerHeight) - 0.5) * 0.06;
+    }, { passive: true });
+  }
 
   function resize() {
     const w = canvas.clientWidth || window.innerWidth;
@@ -366,9 +531,13 @@ async function initScene() {
   function frame() {
     const dt = clock.getDelta();
     if (!reduceMotion) {
-      planet.rotation.y += dt * 0.12;
-      moonPivot.rotation.y += dt * 0.45;
-      visitor.rotation.y += dt * 0.18;
+      planet.rotation.y += dt * 0.16;
+      moonPivot.rotation.y += dt * 0.5;
+      visitor.rotation.y += dt * 0.22;
+      clouds.rotation.y += dt * 0.02;
+      greenery.rotation.y -= dt * 0.015;
+      lab.rotation.x += (targetRX - lab.rotation.x) * 0.04;
+      lab.rotation.z += (targetRZ - lab.rotation.z) * 0.04;
     }
     controls.update();
     renderer.render(scene, camera);
@@ -378,7 +547,7 @@ async function initScene() {
     renderer.setAnimationLoop(document.hidden ? null : frame);
   });
 
-  /* Scene keys — swap which hologram object is on stage. */
+  /* Specimen keys — swap which entity is in the chamber. */
   qa("[data-scene]").forEach((key) => {
     key.addEventListener("click", () => {
       keyClick(880);
