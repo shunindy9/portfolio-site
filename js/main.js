@@ -638,6 +638,29 @@
    * overlay itself is pure CSS gradients, zero per-frame JS cost
    * beyond two custom-property writes.
    * ============================================================ */
+  /* ============================================================
+   * CONTROL LAUNCH — work page version: quick light flash, set the
+   * transition flag, navigate. (The full video-warp lives on the
+   * home page; the work page has the shader instead.)
+   * ============================================================ */
+  function initControlLaunch() {
+    const btn = document.getElementById("control-launch");
+    if (!btn) return;
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      try { sessionStorage.setItem("cockpit-transition", "in"); } catch (_) {}
+      if (reduceMotion) { location.href = btn.href; return; }
+      const flash = document.createElement("div");
+      flash.style.cssText =
+        "position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;" +
+        "background:radial-gradient(80% 80% at 50% 50%, #fff8ea 0%, rgba(255,220,160,0.9) 40%, rgba(79,214,224,0.5) 70%, transparent 100%);" +
+        "transition:opacity 480ms ease-in";
+      document.body.appendChild(flash);
+      requestAnimationFrame(() => { flash.style.opacity = "1"; });
+      setTimeout(() => { location.href = btn.href; }, 520);
+    });
+  }
+
   function initSpotlight() {
     if (!q(".spotlight") || !hasHover) return;
     const root = document.documentElement;
@@ -1231,6 +1254,7 @@
     runScrollReveals();
     initMagnetic();
     initSpotlight();
+    initControlLaunch();
     initWordmarkParallax();
     initPulseBeams();
     initShaderZoom();

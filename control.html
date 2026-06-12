@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>CONTROL — Shunsuke Otsuki</title>
+  <meta name="description" content="Control deck — an interactive cockpit view of Shunsuke Otsuki's contact, services, and systems." />
+
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d0b07'/><circle cx='16' cy='16' r='6' fill='%23ffb01f'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css?v=2026061203" />
+  <link rel="stylesheet" href="css/control.css?v=2026061203" />
+
+  <!-- The cockpit is always dark — a spaceship at night. -->
+  <script>document.documentElement.setAttribute("data-theme", "dark");</script>
+
+  <!-- Three.js loaded as ES modules, dynamically imported by control.js
+       AFTER the deck entrance finishes so the snap animation never
+       competes with module parsing. -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="control-page">
+
+  <!-- Space outside the windshield — same loop as the home page, heavier
+       scrim so the holograms own the light. -->
+  <video class="control-bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+    <source src="assets/video/hj-bg.mp4?v=20260610b" type="video/mp4" />
+  </video>
+  <div class="control-bg-scrim" aria-hidden="true"></div>
+
+  <!-- Entrance / exit flash (driven by control.js + sessionStorage flag). -->
+  <div class="control-flash" aria-hidden="true"></div>
+
+  <a class="skip-link" href="#deck">Skip to control deck</a>
+
+  <header class="control-header">
+    <a class="control-btn glass is-lit" href="index.html" id="exit-top" aria-label="Exit control mode">
+      <svg class="control-btn__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5"/>
+        <path d="m11 18-6-6 6-6"/>
+      </svg>
+      <span class="control-btn__label">Exit</span>
+    </a>
+    <span class="control-meta"><span aria-hidden="true">⌖</span> ORBIT — TOKYO · <time class="jst-clock">--:--</time> JST</span>
+  </header>
+
+  <!-- ====================== HOLOGRAM STAGE ======================
+       The Three.js canvas hosts the spinnable wireframe planet/visitor.
+       DOM hologram panels project over it when deck keys are pressed. -->
+  <main class="stage" aria-label="Hologram stage">
+    <canvas id="scene-canvas" aria-hidden="true"></canvas>
+
+    <!-- No-WebGL fallback: a static wireframe planet (SVG) so the page
+         still reads as a cockpit; all information lives in DOM panels. -->
+    <div class="stage__fallback" hidden aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1">
+        <circle cx="100" cy="100" r="64"/>
+        <ellipse cx="100" cy="100" rx="26" ry="64"/>
+        <ellipse cx="100" cy="100" rx="64" ry="22"/>
+        <ellipse cx="100" cy="100" rx="92" ry="26" transform="rotate(-18 100 100)"/>
+      </svg>
+    </div>
+
+    <p class="stage__hint" id="stage-hint">DRAG TO SPIN · SCROLL TO ZOOM</p>
+
+    <!-- Hologram panels — liquid glass, one open at a time. -->
+    <section class="holo glass" id="holo" hidden aria-live="polite">
+      <button class="holo__close" id="holo-close" aria-label="Close panel">✕</button>
+
+      <div class="holo__pane" data-pane="contact" hidden>
+        <p class="holo__title">// CONTACT</p>
+        <ul class="holo-list">
+          <li><span class="holo-list__key">EMAIL</span><a href="mailto:shun.indy@gmail.com" class="holo-list__val">shun.indy@gmail.com</a></li>
+          <li><span class="holo-list__key">PHONE</span><a href="tel:+818033557778" class="holo-list__val">080-3355-7778</a></li>
+          <li><span class="holo-list__key">BASE</span><span class="holo-list__val" data-ctl="infoValBased">Tokyo, Japan</span></li>
+          <li><span class="holo-list__key">LANG</span><span class="holo-list__val" data-ctl="infoValLanguages">English · 日本語</span></li>
+        </ul>
+        <div class="holo__cta-row">
+          <a class="info-cta info-cta--primary" href="mailto:shun.indy@gmail.com"><span data-ctl="infoEmailCta">Email Me</span></a>
+          <a class="info-cta info-cta--secondary" href="tel:+818033557778"><span data-ctl="infoCallCta">Call Me</span></a>
+        </div>
+      </div>
+
+      <div class="holo__pane" data-pane="services" hidden>
+        <p class="holo__title">// SERVICES</p>
+        <ol class="holo-services" id="holo-services"><!-- built from CONFIG.capabilities --></ol>
+      </div>
+
+      <div class="holo__pane" data-pane="system" hidden>
+        <p class="holo__title">// SYSTEM</p>
+        <div class="gauge-grid" id="gauge-grid">
+          <div class="gauge gauge--lg"><span class="gauge__label">JST TIME</span><span class="gauge__value gauge__value--lg jst-clock-s">--:--:--</span></div>
+          <div class="gauge gauge--lg"><span class="gauge__label">TOKYO TEMP</span><span class="gauge__value gauge__value--lg" id="g-temp">—</span></div>
+          <div class="gauge gauge--lg"><span class="gauge__label">CONDITION</span><span class="gauge__value" id="g-cond">SCANNING…</span></div>
+          <div class="gauge gauge--lg"><span class="gauge__label">WIND</span><span class="gauge__value" id="g-wind">—</span></div>
+          <div class="gauge gauge--lg"><span class="gauge__label">HUMIDITY</span><span class="gauge__value" id="g-hum">—</span></div>
+          <div class="gauge gauge--lg"><span class="gauge__label">SOURCE</span><span class="gauge__value gauge__value--dim">OPEN-METEO · LIVE</span></div>
+        </div>
+      </div>
+
+      <div class="holo__pane" data-pane="work" hidden>
+        <p class="holo__title">// WORK</p>
+        <p class="holo__soon">TRANSMISSION INCOMING<span class="holo__cursor">▮</span></p>
+        <p class="holo__soon-sub">Testimonials &amp; selected work dock here soon.</p>
+      </div>
+
+      <div class="holo__pane" data-pane="music" hidden>
+        <p class="holo__title">// MUSIC</p>
+        <p class="holo__soon">TRANSMISSION INCOMING<span class="holo__cursor">▮</span></p>
+        <p class="holo__soon-sub">Tokyo Analog — scores, sample packs, sonic identity.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Orbiting signature — text loops around a small box like a worm. -->
+  <div class="orbit-sign" aria-hidden="true">
+    <svg viewBox="0 0 150 90">
+      <defs>
+        <path id="orbit-rect" d="M 20 8 H 130 Q 142 8 142 20 V 70 Q 142 82 130 82 H 20 Q 8 82 8 70 V 20 Q 8 8 20 8 Z" />
+      </defs>
+      <text class="orbit-sign__text">
+        <textPath href="#orbit-rect" startOffset="0">
+          SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
+          <animate attributeName="startOffset" from="0%" to="-100%" dur="14s" repeatCount="indefinite" />
+        </textPath>
+        <textPath href="#orbit-rect" startOffset="100%">
+          SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
+          <animate attributeName="startOffset" from="100%" to="0%" dur="14s" repeatCount="indefinite" />
+        </textPath>
+      </text>
+    </svg>
+  </div>
+
+  <!-- ====================== CONTROL DECK ====================== -->
+  <section class="deck" id="deck" aria-label="Control deck">
+    <div class="deck__rail" aria-hidden="true"></div>
+
+    <div class="deck__inner">
+      <div class="deck__cluster deck__cluster--holo" role="group" aria-label="Hologram keys">
+        <button class="deck-key" type="button" data-holo="contact">CONTACT</button>
+        <button class="deck-key" type="button" data-holo="services">SERVICES</button>
+        <button class="deck-key" type="button" data-holo="system">SYSTEM</button>
+        <button class="deck-key deck-key--soon" type="button" data-holo="work">WORK</button>
+        <button class="deck-key deck-key--soon" type="button" data-holo="music">MUSIC</button>
+      </div>
+
+      <div class="deck__cluster deck__cluster--scene" role="group" aria-label="Hologram objects">
+        <button class="deck-key deck-key--cyan is-active" type="button" data-scene="planet">PLANET</button>
+        <button class="deck-key deck-key--cyan" type="button" data-scene="visitor">VISITOR</button>
+        <label class="deck-switch" for="mute-switch">
+          <input type="checkbox" id="mute-switch" />
+          <span class="deck-switch__lever" aria-hidden="true"></span>
+          <span class="deck-switch__label">MUTE</span>
+        </label>
+      </div>
+
+      <div class="deck__cluster deck__cluster--decor" aria-hidden="true">
+        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.72"></span></div>
+        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.35"></span></div>
+        <div class="deck-slider"><span class="deck-slider__thumb" style="--p: 0.55"></span></div>
+        <div class="deck-lights">
+          <span class="deck-light deck-light--amber"></span>
+          <span class="deck-light deck-light--cyan"></span>
+          <span class="deck-light deck-light--amber deck-light--blink"></span>
+        </div>
+      </div>
+
+      <div class="deck__cluster deck__cluster--gauges" role="group" aria-label="Live readouts">
+        <div class="gauge"><span class="gauge__label">JST</span><span class="gauge__value jst-clock">--:--</span></div>
+        <div class="gauge"><span class="gauge__label">TOKYO</span><span class="gauge__value" id="deck-temp">—°</span></div>
+      </div>
+
+      <a class="deck-key deck-key--exit" href="index.html" id="exit-key">EXIT</a>
+    </div>
+  </section>
+
+  <script defer src="js/config.js?v=2026061203"></script>
+  <script type="module" src="js/control.js?v=2026061203"></script>
+</body>
+</html>

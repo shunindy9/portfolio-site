@@ -128,6 +128,72 @@
   }
 
   /* --------------------------------------------------------------
+   * CONTROL LAUNCH — warp into the background: video zooms, the
+   * flash blooms, a one-shot particle burst radiates from center,
+   * then we navigate. control.html reads the sessionStorage flag
+   * and plays its entrance. is-returning reverses on the way back.
+   * -------------------------------------------------------------- */
+  function particleBurst() {
+    var c = document.createElement("canvas");
+    c.style.cssText = "position:fixed;inset:0;z-index:55;pointer-events:none";
+    document.body.appendChild(c);
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width = window.innerWidth * dpr;
+    c.height = window.innerHeight * dpr;
+    var ctx = c.getContext("2d");
+    ctx.scale(dpr, dpr);
+    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    var COLORS = ["#FFB35C", "#4FD6E0", "#fff1a8", "#ff14d4"];
+    var parts = [];
+    for (var i = 0; i < 140; i++) {
+      var a = Math.random() * Math.PI * 2;
+      var sp = 4 + Math.random() * 14;
+      parts.push({
+        x: cx, y: cy,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        r: 0.8 + Math.random() * 2.2,
+        col: COLORS[(Math.random() * COLORS.length) | 0]
+      });
+    }
+    var start = performance.now();
+    (function draw(now) {
+      var t = (now - start) / 700;
+      if (t >= 1) { c.remove(); return; }
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.globalAlpha = 1 - t;
+      for (var j = 0; j < parts.length; j++) {
+        var p = parts[j];
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 1.04; p.vy *= 1.04;
+        ctx.fillStyle = p.col;
+        ctx.fillRect(p.x, p.y, p.r, p.r * 3);
+      }
+      requestAnimationFrame(draw);
+    })(start);
+  }
+
+  var controlBtn = document.getElementById("control-launch");
+  if (controlBtn) {
+    controlBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      try { sessionStorage.setItem("cockpit-transition", "in"); } catch (_) {}
+      if (reduceMotion) { location.href = controlBtn.href; return; }
+      document.body.classList.add("is-warping");
+      particleBurst();
+      setTimeout(function () { location.href = controlBtn.href; }, 730);
+    });
+  }
+  try {
+    if (sessionStorage.getItem("cockpit-transition") === "out") {
+      sessionStorage.removeItem("cockpit-transition");
+      if (!reduceMotion) {
+        document.body.classList.add("is-returning");
+        setTimeout(function () { document.body.classList.remove("is-returning"); }, 950);
+      }
+    }
+  } catch (_) {}
+
+  /* --------------------------------------------------------------
    * Live JST clock (HH:MM, ticks every 30s) + year.
    * -------------------------------------------------------------- */
   var clockEls = qa(".jst-clock");

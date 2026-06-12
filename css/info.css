@@ -149,6 +149,29 @@
   mix-blend-mode: screen;
 }
 
+/* Warp transition — CONTROL launch. The video zooms toward the viewer
+ * while the flash blooms; control.js picks up on the other side via a
+ * sessionStorage flag. is-returning plays the reverse on the way back. */
+body.is-warping .info-bg-video {
+  transition: transform 720ms cubic-bezier(0.6, 0, 0.85, 1);
+  transform: scale(1.7);
+}
+body.is-warping .info-flash {
+  opacity: 1;
+  transition: opacity 560ms ease-in;
+}
+body.is-returning .info-bg-video {
+  animation: warp-return 850ms var(--ease-out) both;
+}
+@keyframes warp-return {
+  from { transform: scale(1.35); }
+  to   { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.is-warping .info-bg-video,
+  body.is-returning .info-bg-video { transition: none; animation: none; transform: none; }
+}
+
 /* Click pulse — boost saturation briefly, like a flashbulb pop. The
  * .is-pulsing body class is toggled by JS for ~400ms after each click. */
 body.is-pulsing .info-bg-video {

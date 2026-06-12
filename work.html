@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061202" />
+  <link rel="stylesheet" href="css/style.css?v=2026061203" />
 
   <!-- Apply theme BEFORE first paint so there's no dark→light flash on load.
        Order: explicit user choice (localStorage) → OS preference → dark. -->
@@ -50,14 +50,14 @@
 
   <header class="site-header" aria-label="Primary">
     <div class="site-header__left">
-      <button type="button" class="control-btn glass is-lit" data-standby aria-disabled="true" title="Control deck — coming online">
+      <a class="control-btn glass is-lit" href="control.html" id="control-launch" aria-label="Enter control mode">
         <svg class="control-btn__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 2c3 2.5 4.5 6 4.5 9.5L14 14h-4l-2.5-2.5C7.5 8 9 4.5 12 2Z"/>
           <circle cx="12" cy="8.5" r="1.6"/>
           <path d="M9.5 14l-1 4 3.5-2 3.5 2-1-4"/>
         </svg>
         <span class="control-btn__label">Control</span>
-      </button>
+      </a>
       <a href="#hero" class="site-mark" data-bind="name-mark" aria-label="Home">—</a>
       <span class="status" data-bind="status" hidden>
         <span class="status__dot" aria-hidden="true"></span>
@@ -235,8 +235,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 
   <!-- Site scripts -->
-  <script defer src="js/config.js?v=2026061202"></script>
-  <script defer src="js/visual.js?v=2026061202"></script>
-  <script defer src="js/main.js?v=2026061202"></script>
+  <script defer src="js/config.js?v=2026061203"></script>
+  <script defer src="js/visual.js?v=2026061203"></script>
+  <script defer src="js/main.js?v=2026061203"></script>
 </body>
 </html>
