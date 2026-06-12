@@ -65,6 +65,22 @@
 
   --ease-out:  cubic-bezier(0.2, 0.7, 0.1, 1);
   --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  /* Anime snap — overshoot/bounce for the cockpit deck + control button. */
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ----- Analog Liquid Glass design language (Phase 1 upgrade) -----
+   * Legibility-first: the tint alpha is the contrast guarantee; blur and
+   * highlights are mood. Tune --glass-tint alpha 0.30–0.55 if a video
+   * frame ever defeats the contrast target. */
+  --ink:        #F2F5F8;                    /* off-white body copy        */
+  --neo-amber:  #FFB35C;                    /* warm analog-bulb halo      */
+  --neo-cyan:   #4FD6E0;                    /* CRT rim light              */
+  --space:      #0A0E14;                    /* deep-space surface         */
+  --glass-blur:      18px;
+  --glass-tint:      rgba(8, 12, 18, 0.40);
+  --glass-tint-flat: rgba(8, 12, 18, 0.55); /* no-blur fallback variant   */
+  --glass-radius:    18px;
+  --glass-highlight: rgba(255, 255, 255, 0.12);
 }
 
 /* ===========================================================================
@@ -98,6 +114,14 @@
   /* Inked-board idle for light theme — dark glyphs on cream. */
   --board-dim:      rgba(20, 17, 10, 0.72);
   --board-dim-glow: rgba(20, 17, 10, 0.30);
+
+  /* Liquid glass on cream — bright tint, ink text. */
+  --ink:             #14110a;
+  --neo-amber:       #b86a14;
+  --neo-cyan:        #0d7e8a;
+  --glass-tint:      rgba(244, 239, 226, 0.55);
+  --glass-tint-flat: rgba(244, 239, 226, 0.72);
+  --glass-highlight: rgba(255, 255, 255, 0.55);
 }
 :root[data-theme="light"] body { color-scheme: light; }
 
@@ -1615,4 +1639,200 @@ body.is-loud-beat .status__dot {
     color: var(--text);
     text-shadow: 0 0 6px var(--accent-glow-1), 0 0 12px var(--accent-glow-2);
   }
+}
+
+/* ===========================================================================
+ * ANALOG LIQUID GLASS — Phase 1 design language (shared by all pages).
+ * Three utilities:
+ *   .glass      — blurred dark-tint backplate that guarantees text contrast
+ *   .glass--flat— tint-only variant (no backdrop-filter) for surfaces that
+ *                 already sit on opaque veils, and as the perf fallback
+ *   .bulb       — warm "analog bulb" text glow with a thin CRT-cyan rim
+ * Legibility rule: the tint does the contrast work; blur and highlights are
+ * mood only. Never stack two blurring elements over the same pixels.
+ * ======================================================================== */
+.glass,
+.glass--flat {
+  position: relative;
+  overflow: hidden; /* clips the specular sweep strip */
+  background: var(--glass-tint);
+  border-radius: var(--glass-radius);
+  box-shadow:
+    inset 1px 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 12px 32px -12px rgba(0, 0, 0, 0.50);
+}
+.glass {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}
+.glass--flat { background: var(--glass-tint-flat); }
+
+/* Specular sweep — a slow diagonal light band crossing the panel, like a
+ * reflection sliding over real glass. Transform-only (compositor cheap,
+ * never background-position — that repaints every frame) and runs ONLY
+ * while the panel is revealed (.is-in from the page observers, or .is-lit
+ * set statically on above-the-fold panels). */
+.glass::after,
+.glass--flat::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -30%;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.05) 60%,
+    transparent
+  );
+  transform: translateX(-150%) skewX(-18deg);
+  animation: glass-sweep 9s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.glass.is-lit::after,
+.glass.is-in::after,
+.glass--flat.is-lit::after,
+.glass--flat.is-in::after { animation-play-state: running; }
+@keyframes glass-sweep {
+  0%, 55%   { transform: translateX(-150%) skewX(-18deg); }
+  85%, 100% { transform: translateX(480%)  skewX(-18deg); }
+}
+
+/* ---------- .bulb — neon analog-bulb text glow ---------- */
+.bulb {
+  text-shadow:
+    0 0 4px  rgba(255, 179, 92, 0.55),
+    0 0 12px rgba(255, 179, 92, 0.30),
+    0 0 28px rgba(255, 179, 92, 0.14),
+    1px 0 2px  rgba(79, 214, 224, 0.22),
+    -1px 0 2px rgba(79, 214, 224, 0.16);
+}
+.bulb:hover,
+.bulb:focus-visible,
+.bulb.is-hot {
+  text-shadow:
+    0 0 5px  rgba(255, 179, 92, 0.80),
+    0 0 16px rgba(255, 179, 92, 0.50),
+    0 0 36px rgba(255, 179, 92, 0.25),
+    1px 0 2px  rgba(79, 214, 224, 0.35),
+    -1px 0 2px rgba(79, 214, 224, 0.25);
+  animation: bulb-flicker 1.8s steps(1, jump-none) infinite;
+}
+/* Filament flicker — tiny (≤6%) brightness jitter, vintage-tube unstable. */
+@keyframes bulb-flicker {
+  0%, 100% { opacity: 1; }
+  78%      { opacity: 1; }
+  80%      { opacity: 0.945; }
+  82%      { opacity: 0.995; }
+  85%      { opacity: 0.955; }
+  87%      { opacity: 1; }
+  93%      { opacity: 0.97; }
+}
+
+/* ---------- CONTROL button — top-left, every page ---------- */
+.control-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  animation: control-float 4.5s ease-in-out infinite;
+  transition: transform 240ms var(--ease-snap), box-shadow 240ms var(--ease-out);
+}
+.control-btn .control-btn__glyph {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--neo-amber);
+}
+.control-btn:hover,
+.control-btn:focus-visible {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow:
+    inset 1px 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 18px rgba(255, 179, 92, 0.35),
+    0 12px 32px -12px rgba(0, 0, 0, 0.50);
+}
+.control-btn[data-standby] {
+  opacity: 0.62;
+  cursor: default;
+}
+.control-btn[data-standby]:hover { transform: none; }
+@keyframes control-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* ---------- .spotlight — cursor reveal lens (work page) ----------
+ * A fixed overlay whose darkening core RAISES contrast under the cursor
+ * and whose thin amber→magenta→cyan rim reads as the lens itself.
+ * Driven by the same --mouse-x/--mouse-y rAF pipeline as the info page.
+ * Sits above the shader background, below all content. */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* above the fixed shader host (-1), below positioned content */
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(4, 6, 10, 0.42) 0%,
+      rgba(4, 6, 10, 0.26) 45%,
+      transparent 70%
+    ),
+    radial-gradient(
+      circle 330px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      transparent 62%,
+      rgba(255, 179, 92, 0.16) 68%,
+      rgba(255, 20, 212, 0.10) 72%,
+      rgba(79, 214, 224, 0.16) 76%,
+      transparent 82%
+    );
+}
+@media (hover: none) {
+  .spotlight { display: none; }
+}
+
+/* ---------- Work-page applications of the glass system ---------- */
+.cap-grid__item.glass--flat { border-radius: 10px; }
+/* No sweep on the four always-revealed cards — the section plates carry
+ * the mood; four extra permanent animations is the old lag pattern. */
+.cap-grid__item.glass--flat::after { content: none; }
+.contact__inner.glass--flat,
+.about__copy.glass--flat {
+  padding: clamp(28px, 4vw, 48px);
+}
+
+/* ---------- Reduced motion: glass goes near-opaque, all idle motion off */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --glass-tint:      rgba(8, 12, 18, 0.88);
+    --glass-tint-flat: rgba(8, 12, 18, 0.92);
+  }
+  :root[data-theme="light"] {
+    --glass-tint:      rgba(244, 239, 226, 0.90);
+    --glass-tint-flat: rgba(244, 239, 226, 0.94);
+  }
+  .glass::after,
+  .glass--flat::after { animation: none; content: none; }
+  .bulb:hover, .bulb:focus-visible, .bulb.is-hot { animation: none; }
+  .control-btn { animation: none; }
+  .spotlight { display: none; }
 }

@@ -108,7 +108,7 @@
     // Capabilities — rebuild
     if (capList && Array.isArray(S.capabilities)) {
       capList.innerHTML = S.capabilities.map((c, i) => `
-        <li class="cap-grid__item reveal-on-scroll is-in" style="opacity:1;transform:none;--shimmer-i:${i}">
+        <li class="cap-grid__item glass--flat reveal-on-scroll is-in" style="opacity:1;transform:none;--shimmer-i:${i}">
           <span class="cap-grid__num">0${i + 1}</span>
           <div class="cap-grid__row">
             <h3 class="cap-grid__title">${escapeHTML(c.title)}</h3>
@@ -628,6 +628,31 @@
       const ny = (e.clientY / h) - 0.5;
       xTo(nx * w * amt);
       yTo(ny * h * amt * 0.6);
+    }, { passive: true });
+  }
+
+  /* ============================================================
+   * SPOTLIGHT — cursor reveal lens. Feeds --mouse-x/--mouse-y to the
+   * fixed .spotlight overlay (style.css), which darkens the shader
+   * locally to RAISE contrast under the cursor. rAF-coalesced; the
+   * overlay itself is pure CSS gradients, zero per-frame JS cost
+   * beyond two custom-property writes.
+   * ============================================================ */
+  function initSpotlight() {
+    if (!q(".spotlight") || !hasHover) return;
+    const root = document.documentElement;
+    let pending = false;
+    let px = 0.5, py = 0.5;
+    window.addEventListener("pointermove", (e) => {
+      px = e.clientX / window.innerWidth;
+      py = e.clientY / window.innerHeight;
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        root.style.setProperty("--mouse-x", (px * 100).toFixed(2) + "%");
+        root.style.setProperty("--mouse-y", (py * 100).toFixed(2) + "%");
+      });
     }, { passive: true });
   }
 
@@ -1205,6 +1230,7 @@
     runHeroEntrance();
     runScrollReveals();
     initMagnetic();
+    initSpotlight();
     initWordmarkParallax();
     initPulseBeams();
     initShaderZoom();

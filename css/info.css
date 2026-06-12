@@ -89,23 +89,36 @@
     linear-gradient(180deg, rgba(13,11,7,0.25) 0%, rgba(13,11,7,0.55) 60%, rgba(13,11,7,0.78) 100%);
 }
 
-/* Cursor lens — a colored radial gradient that follows the mouse and
- * blends into the video with color-dodge. Pulls saturated hue out of the
- * sepia-tinted source wherever the cursor is. Pure CSS-variable driven;
- * the JS only flips two custom properties on pointer move. */
+/* Cursor reveal lens — the legibility hero. The inner radial DARKENS the
+ * video locally (raising contrast under whatever the cursor approaches);
+ * the thin amber→magenta→cyan ring outside it reads as the lens glass.
+ * Replaces the old color-dodge lens, which brightened the background and
+ * cost contrast. Pure CSS-variable driven; JS only flips --mouse-x/y.
+ * Sits at z-index 1 — above video/scrim, below all text (z-index 2). */
 .info-bg-lens {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(
-    circle 360px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    hsla(var(--lens-hue, 320), 90%, 60%, 0.55) 0%,
-    hsla(var(--lens-hue, 320), 90%, 50%, 0.20) 30%,
-    transparent 65%
-  );
-  mix-blend-mode: color-dodge;
+  background:
+    radial-gradient(
+      circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(4, 6, 10, 0.42) 0%,
+      rgba(4, 6, 10, 0.26) 45%,
+      transparent 70%
+    ),
+    radial-gradient(
+      circle 330px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      transparent 62%,
+      rgba(255, 179, 92, 0.18) 68%,
+      rgba(255, 20, 212, 0.10) 72%,
+      rgba(79, 214, 224, 0.16) 76%,
+      transparent 82%
+    );
   /* No transition on background — same reason as the video filter. */
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .info-bg-lens { display: none; }
 }
 
 /* Flash from below — fires when the user reaches the end of the scroll.
@@ -205,6 +218,12 @@ body.is-pulsing .info-bg-video {
 .info-meta__clock {
   color: var(--analog-yellow-hot);
 }
+.info-header__left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
 .info-header__right {
   display: flex;
   align-items: center;
@@ -238,10 +257,12 @@ body.is-pulsing .info-bg-video {
   padding: 80px var(--pad-x) 120px;
 }
 
-/* Hero block — name large in the middle */
+/* Hero block — name large in the middle, on its own glass backplate.
+ * is-lit is set statically in the markup (above the fold, no observer). */
 .info-hero {
   text-align: center;
-  padding: 60px 0 100px;
+  padding: 56px clamp(20px, 4vw, 48px) 64px;
+  margin-bottom: 26px;
 }
 .info-eyebrow {
   font-family: "DSEG14 Classic", var(--font-mono);
@@ -258,7 +279,10 @@ body.is-pulsing .info-bg-video {
    * bottom of this file — instrument-cluster look, no fracturing. */
   font-family: "DSEG14 Classic", var(--font-display);
   font-weight: 700;
-  font-size: clamp(48px, 7.5vw, 104px);
+  /* Sized so "SHUNSUKE" always fits inside the glass plate's content
+   * width (~536px at desktop) — the plate clips overflow for its
+   * specular sweep, so the name must never exceed it. */
+  font-size: clamp(40px, 6.2vw, 84px);
   letter-spacing: 0.005em;
   line-height: 1.05;
   margin: 0 0 30px;
@@ -274,7 +298,7 @@ body.is-pulsing .info-bg-video {
 .info-tagline {
   font-family: var(--font-body);
   font-size: clamp(19px, 1.2vw + 13px, 24px);
-  color: var(--analog-yellow);
+  color: var(--ink);
   margin: 0 auto;
   max-width: 34ch;
   line-height: 1.55;
@@ -358,10 +382,19 @@ body.is-pulsing .info-bg-video {
  * digital-clock aesthetic now comes entirely from the static DSEG14
  * glyphs + the white-RGB text aura. */
 
-/* ----- Info blocks ----- */
+/* ----- Info blocks — each one a liquid-glass card ----- */
 .info-block {
-  border-top: 1px solid var(--hairline);
-  padding: 32px 0 28px;
+  padding: 30px clamp(22px, 3.4vw, 36px) 30px;
+}
+.info-block + .info-block { margin-top: 22px; }
+
+/* The caps block breaks out of the 760px column so its 4 columns get
+ * room; the glass plate travels with it (breakout lives on the BLOCK,
+ * not the grid, so the backplate covers the full width). */
+.info-block--caps {
+  --caps-w: min(1180px, calc(100vw - 2 * var(--pad-x)));
+  width: var(--caps-w);
+  margin-left: calc((100% - var(--caps-w)) / 2);
 }
 .info-block__label {
   display: flex;
@@ -371,14 +404,14 @@ body.is-pulsing .info-bg-video {
   font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--analog-yellow-deep);
+  color: var(--analog-yellow);
   margin: 0 0 22px;
 }
 .info-prose {
   font-family: var(--font-body);
   font-size: clamp(18px, 1vw + 13px, 21px);
   line-height: 1.65;
-  color: var(--analog-yellow);
+  color: var(--ink);
   margin: 0;
   max-width: 56ch;
 }
@@ -403,12 +436,12 @@ body.is-pulsing .info-bg-video {
   font-size: 13px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--analog-yellow-deep);
+  color: var(--analog-yellow);
 }
 .info-list__val {
   font-family: var(--font-body);
   font-size: 20px;
-  color: var(--analog-yellow);
+  color: var(--ink);
 }
 .info-list__val--link {
   position: relative;
@@ -444,7 +477,7 @@ body.is-pulsing .info-bg-video {
   display: inline-block;
   font-family: var(--font-body);
   font-size: 20px;
-  color: var(--analog-yellow);
+  color: var(--ink);
   position: relative;
   padding-right: 18px;
   transition: color 240ms var(--ease-out), text-shadow 240ms var(--ease-out);
@@ -476,7 +509,7 @@ body.is-pulsing .info-bg-video {
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--analog-yellow-deep);
+  color: var(--analog-yellow);
   text-align: center;
 }
 
@@ -555,13 +588,12 @@ body.is-pulsing .info-bg-video {
 @keyframes cap-spin    { to { transform: rotate(360deg); } }
 @keyframes cap-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.78); } }
 
-/* ----- 4-up capabilities grid — breaks out of the 760px column ----- */
+/* ----- 4-up capabilities grid (breakout handled by .info-block--caps) ----- */
 .info-caps {
   list-style: none;
   padding: 0;
-  --caps-w: min(1180px, calc(100vw - 2 * var(--pad-x)));
-  width: var(--caps-w);
-  margin: 8px 0 0 calc((100% - var(--caps-w)) / 2);
+  width: 100%;
+  margin: 8px 0 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(20px, 3vw, 44px);
@@ -575,22 +607,22 @@ body.is-pulsing .info-bg-video {
   font-family: "DSEG14 Classic", var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.2em;
-  color: var(--analog-yellow-deep);
+  color: var(--analog-yellow);
 }
 .info-cap__title {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: clamp(19px, 1.4vw, 23px);
   line-height: 1.3;
-  color: var(--analog-yellow-hot);
+  color: var(--ink);
   margin: 12px 0 12px;
 }
 .info-cap__note {
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
-  color: var(--analog-yellow);
-  opacity: 0.85;
+  color: var(--ink);
+  opacity: 0.88;
   margin: 0;
 }
 
@@ -626,24 +658,21 @@ body.is-pulsing .info-bg-video {
 }
 
 /* ===========================================================================
- * TEXT AURA — every text node on the info page wears an analog-yellow
- * phosphor halo. Three-layer shadow stack: a hot inner core, a wider
- * warm bleed, and a deep amber edge for chromatic depth. Static (no
- * animation = zero per-frame cost) but visually "burning" because of
- * the stacked warm shadows. CRT instrument-cluster look — futuristic
- * but analog.
+ * TEXT AURA — two tiers, legibility first.
  *
- * Excludes the CTA labels (they have their own amber background-driven
- * hover glow). Light theme dims the bleed and warms the edge so the
- * yellow still reads against the cream background.
+ * HEADING TIER (analog-yellow phosphor + thin CRT-cyan rim): the name,
+ * eyebrow, section labels, list keys, card numbers, header/footer meta.
+ * The "analog bulb" — warm core, wide bleed, cyan rim for the CRT edge.
+ *
+ * BODY TIER (off-white --ink): prose, values, notes, link text. These get
+ * a tight DARK shadow that lifts the letters off bright video frames —
+ * the glass tint guarantees contrast, the shadow buys extra headroom.
+ * Static shadows only = zero per-frame cost.
  * ======================================================================== */
-.info-main p,
-.info-main h1,
-.info-main h2,
-.info-main h3,
-.info-main span:not(.info-cta__icon):not(.info-cta__label),
-.info-main a:not(.info-cta),
-.info-main li,
+.info-eyebrow,
+.info-block__label,
+.info-list__key,
+.info-cap__num,
 .info-back,
 .info-meta,
 .info-meta__clock,
@@ -652,7 +681,8 @@ body.is-pulsing .info-bg-video {
      0 0 4px  var(--analog-yellow-glow),
      0 0 10px var(--analog-yellow-glow-2),
      0 0 22px var(--analog-yellow-glow-2),
-     0 0 1px  var(--analog-yellow-edge);
+     1px 0 2px  rgba(79, 214, 224, 0.20),
+    -1px 0 2px  rgba(79, 214, 224, 0.14);
 }
 
 /* Name carries a heavier phosphor burn — it's the focal anchor on the
@@ -662,20 +692,42 @@ body.is-pulsing .info-bg-video {
      0 0 6px  var(--analog-yellow-glow),
      0 0 18px var(--analog-yellow-glow),
      0 0 38px var(--analog-yellow-glow-2),
-     0 0 1px  var(--analog-yellow-edge);
+     1px 0 2px  rgba(79, 214, 224, 0.28),
+    -1px 0 2px  rgba(79, 214, 224, 0.20);
 }
 
-/* Section labels — slightly deeper edge tint so the segmented label
- * faces stand apart from the values they introduce. */
-.info-block__label {
+/* Body tier — dark legibility shadow under off-white copy. */
+.info-tagline,
+.info-prose,
+.info-list__val,
+.info-cap__note,
+.info-links li a {
   text-shadow:
-     0 0 6px  var(--analog-yellow-glow),
-     0 0 14px var(--analog-yellow-glow-2),
-     0 0 1px  var(--analog-yellow-edge);
+    0 1px 3px rgba(0, 0, 0, 0.55),
+    0 0 12px  rgba(0, 0, 0, 0.25);
+}
+/* Card titles — ink with a faint warm halo, sitting between tiers. */
+.info-cap__title {
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.55),
+    0 0 14px  rgba(255, 179, 92, 0.22);
+}
+
+/* Cursor-proximity proxy — hovering anywhere in a block heats its label's
+ * bulb (cheap CSS, no JS distance loop; pairs with the reveal lens). */
+.info-block:hover .info-block__label,
+.info-block:hover .mini-logo {
+  text-shadow:
+     0 0 5px  var(--analog-yellow-glow),
+     0 0 14px var(--analog-yellow-glow),
+     0 0 28px var(--analog-yellow-glow-2),
+     1px 0 2px  rgba(79, 214, 224, 0.32),
+    -1px 0 2px  rgba(79, 214, 224, 0.22);
 }
 
 /* Light theme — flip the bleed darker so the yellow still has presence
- * against cream. The edge tint stays warm to preserve the analog feel. */
+ * against cream, and swap the body tier's dark shadow for a soft white
+ * halo (dark shadows under dark ink would smear). */
 :root[data-theme="light"] .info-page {
   --analog-yellow:        #b8770a;
   --analog-yellow-hot:    #d09010;
@@ -683,6 +735,14 @@ body.is-pulsing .info-bg-video {
   --analog-yellow-glow:   rgba(184, 119, 10, 0.32);
   --analog-yellow-glow-2: rgba(184, 119, 10, 0.14);
   --analog-yellow-edge:   rgba(140,  90,  6, 0.45);
+}
+:root[data-theme="light"] .info-tagline,
+:root[data-theme="light"] .info-prose,
+:root[data-theme="light"] .info-list__val,
+:root[data-theme="light"] .info-cap__note,
+:root[data-theme="light"] .info-cap__title,
+:root[data-theme="light"] .info-links li a {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.45);
 }
 
 /* Hover states stack the phosphor glow brighter — same color family,
@@ -695,5 +755,6 @@ body.is-pulsing .info-bg-video {
      0 0 8px  var(--analog-yellow-glow),
      0 0 18px var(--analog-yellow-glow),
      0 0 34px var(--analog-yellow-glow-2),
-     0 0 1px  var(--analog-yellow-edge);
+     1px 0 2px  rgba(79, 214, 224, 0.30),
+    -1px 0 2px  rgba(79, 214, 224, 0.22);
 }

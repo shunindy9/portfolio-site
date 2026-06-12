@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061201" />
-  <link rel="stylesheet" href="css/info.css?v=2026061201" />
+  <link rel="stylesheet" href="css/style.css?v=2026061202" />
+  <link rel="stylesheet" href="css/info.css?v=2026061202" />
 
   <script>
     (function () {
@@ -42,10 +42,20 @@
   <a class="skip-link" href="#info-main">Skip to content</a>
 
   <header class="info-header">
-    <a href="work.html" class="info-back" aria-label="View work">
-      <span data-bind="infoWorkLabel">View Work</span>
-      <span aria-hidden="true">→</span>
-    </a>
+    <div class="info-header__left">
+      <button type="button" class="control-btn glass is-lit" data-standby aria-disabled="true" title="Control deck — coming online">
+        <svg class="control-btn__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2c3 2.5 4.5 6 4.5 9.5L14 14h-4l-2.5-2.5C7.5 8 9 4.5 12 2Z"/>
+          <circle cx="12" cy="8.5" r="1.6"/>
+          <path d="M9.5 14l-1 4 3.5-2 3.5 2-1-4"/>
+        </svg>
+        <span class="control-btn__label">Control</span>
+      </button>
+      <a href="work.html" class="info-back" aria-label="View work">
+        <span data-bind="infoWorkLabel">View Work</span>
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
     <div class="info-header__right">
       <span class="info-meta"><span class="info-meta__city">TOKYO</span> · <time class="info-meta__clock jst-clock">—</time> JST</span>
       <div class="lang-toggle" role="group" aria-label="Switch site language" data-state="en">
@@ -74,7 +84,7 @@
 
   <main id="info-main" class="info-main">
 
-    <section class="info-hero">
+    <section class="info-hero glass is-lit">
       <p class="info-eyebrow" data-bind="infoEyebrow">Personal Information</p>
       <h1 class="info-name">Shunsuke Otsuki</h1>
       <p class="info-tagline" data-bind="infoTagline">Creative Director · Designer · Technologist — Tokyo.</p>
@@ -102,7 +112,7 @@
       </div>
     </section>
 
-    <section class="info-block info-block--contact reveal">
+    <section class="info-block info-block--contact glass--flat reveal">
       <p class="info-block__label">
         <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle class="draw" style="--d:0" cx="12" cy="12" r="9" pathLength="1"/>
@@ -131,7 +141,7 @@
       </ul>
     </section>
 
-    <section class="info-block reveal">
+    <section class="info-block glass--flat reveal">
       <p class="info-block__label">
         <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path class="draw" style="--d:0" d="M12 3.5 21 19.5 3 19.5 Z" pathLength="1"/>
@@ -149,7 +159,7 @@
     <!-- Services — borndigital.be-style 4-up: each capability column carries
          a thin line-art logo that draws itself in on scroll, then keeps a
          slow ambient motion (transform-only, compositor cheap). -->
-    <section class="info-block info-block--caps reveal">
+    <section class="info-block info-block--caps glass--flat reveal">
       <p class="info-block__label">
         <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle class="draw" style="--d:0" cx="12" cy="7.5"  r="4" pathLength="1"/>
@@ -236,7 +246,7 @@
       </ul>
     </section>
 
-    <section class="info-block reveal">
+    <section class="info-block glass--flat reveal">
       <p class="info-block__label">
         <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle class="draw" style="--d:0" cx="12" cy="12" r="9" pathLength="1"/>
@@ -248,7 +258,7 @@
       <p class="info-prose" data-bind="infoAvailability">Available for new commissions and collaborations — 2026.</p>
     </section>
 
-    <section class="info-block reveal">
+    <section class="info-block glass--flat reveal">
       <p class="info-block__label">
         <svg class="mini-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle class="draw" style="--d:0" cx="12" cy="12" r="4.5" pathLength="1"/>
@@ -271,7 +281,7 @@
     <p>© <span id="info-year">—</span> Shunsuke Otsuki — <span data-bind="credit">Designed &amp; built in Tokyo.</span></p>
   </footer>
 
-  <script defer src="js/config.js?v=2026061201"></script>
-  <script defer src="js/info.js?v=2026061201"></script>
+  <script defer src="js/config.js?v=2026061202"></script>
+  <script defer src="js/info.js?v=2026061202"></script>
 </body>
 </html>
