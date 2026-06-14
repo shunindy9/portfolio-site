@@ -115,11 +115,11 @@
   --neo-amber:  #FFB35C;                    /* warm analog-bulb halo      */
   --neo-cyan:   #4FD6E0;                    /* CRT rim light              */
   --space:      #0A0E14;                    /* deep-space surface         */
-  --glass-blur:      18px;
-  --glass-tint:      rgba(8, 12, 18, 0.40);
-  --glass-tint-flat: rgba(8, 12, 18, 0.55); /* no-blur fallback variant   */
-  --glass-radius:    26px;                  /* capsule-ish — water tube   */
-  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-blur:      16px;
+  --glass-tint:      rgba(8, 12, 18, 0.24);  /* clearer — see-through glass */
+  --glass-tint-flat: rgba(8, 12, 18, 0.34);  /* no-blur fallback variant   */
+  --glass-radius:    26px;                   /* capsule-ish — water tube   */
+  --glass-highlight: rgba(255, 255, 255, 0.22);
 }
 
 /* ===========================================================================
@@ -154,13 +154,13 @@
   --board-dim:      rgba(20, 17, 10, 0.72);
   --board-dim-glow: rgba(20, 17, 10, 0.30);
 
-  /* Liquid glass on cream — bright tint, ink text. */
+  /* Liquid glass on cream — clearer tint, ink text. */
   --ink:             #14110a;
   --neo-amber:       #b86a14;
   --neo-cyan:        #0d7e8a;
-  --glass-tint:      rgba(244, 239, 226, 0.55);
-  --glass-tint-flat: rgba(244, 239, 226, 0.72);
-  --glass-highlight: rgba(255, 255, 255, 0.55);
+  --glass-tint:      rgba(244, 239, 226, 0.42);
+  --glass-tint-flat: rgba(244, 239, 226, 0.52);
+  --glass-highlight: rgba(255, 255, 255, 0.65);
 }
 :root[data-theme="light"] body { color-scheme: light; }
 
@@ -1694,30 +1694,33 @@ body.is-loud-beat .status__dot {
 .glass--flat {
   position: relative;
   overflow: hidden; /* clips the specular sweep strip */
-  /* "Water tube" shading — curved edge darkening + a vertical meniscus
-   * highlight band + top water-line sheen, layered over the tint. All
-   * static gradients: the cylindrical read costs nothing per frame. */
+  /* Clear glass: a soft diagonal light-catch + a top water-line sheen
+   * over a LOW tint, with only the faintest edge falloff so the panel
+   * reads see-through and glossy rather than like a dark tube. All
+   * static gradients — zero per-frame cost. */
   background:
-    linear-gradient(90deg, rgba(2, 4, 8, 0.32) 0%, transparent 6%, transparent 94%, rgba(2, 4, 8, 0.32) 100%),
-    linear-gradient(90deg, transparent 4.5%, rgba(255, 255, 255, 0.11) 7.5%, rgba(255, 255, 255, 0.02) 12%, transparent 16%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(2, 4, 8, 0.20) 100%),
+    linear-gradient(125deg, transparent 0%, rgba(255, 255, 255, 0.07) 16%, transparent 33%, transparent 63%, rgba(255, 255, 255, 0.05) 77%, transparent 93%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 14%, transparent 22%),
+    linear-gradient(90deg, rgba(2, 4, 8, 0.14) 0%, transparent 5%, transparent 95%, rgba(2, 4, 8, 0.14) 100%),
     var(--glass-tint);
   border-radius: var(--glass-radius);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    inset 1px 1px 0 var(--glass-highlight),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset -2px 0 6px -2px rgba(255, 255, 255, 0.05),
-    0 12px 32px -12px rgba(0, 0, 0, 0.50);
+    inset 1.5px 1.5px 0 var(--glass-highlight),  /* bright lit top-left edge */
+    inset -1px -1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 34px rgba(255, 255, 255, 0.035),   /* faint internal glow      */
+    0 16px 42px -16px rgba(0, 0, 0, 0.55);
 }
 .glass {
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  /* brightness lift makes the blurred backdrop feel lit through the glass */
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.05);
+  backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.05);
 }
 .glass--flat {
   background:
-    linear-gradient(90deg, rgba(2, 4, 8, 0.32) 0%, transparent 6%, transparent 94%, rgba(2, 4, 8, 0.32) 100%),
-    linear-gradient(90deg, transparent 4.5%, rgba(255, 255, 255, 0.10) 7.5%, rgba(255, 255, 255, 0.02) 12%, transparent 16%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 12%, transparent 88%, rgba(2, 4, 8, 0.20) 100%),
+    linear-gradient(125deg, transparent 0%, rgba(255, 255, 255, 0.07) 16%, transparent 33%, transparent 63%, rgba(255, 255, 255, 0.05) 77%, transparent 93%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 14%, transparent 22%),
+    linear-gradient(90deg, rgba(2, 4, 8, 0.14) 0%, transparent 5%, transparent 95%, rgba(2, 4, 8, 0.14) 100%),
     var(--glass-tint-flat);
 }
 
@@ -1760,9 +1763,9 @@ body.is-loud-beat .status__dot {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.05) 40%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 255, 255, 0.05) 60%,
+    rgba(255, 255, 255, 0.08) 38%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.08) 62%,
     transparent
   );
   transform: translateX(-150%) skewX(-18deg);
@@ -1809,32 +1812,45 @@ body.is-loud-beat .status__dot {
   93%      { opacity: 0.97; }
 }
 
-/* ---------- Cursor — a small circle that follows the pointer ----------
- * Replaces the old reveal-lens. A JS follower (in info.js + main.js)
- * creates the element, tracks the pointer 1:1, and adds .cursor-none to
- * <html> so the OS arrow is hidden only once the dot is live (graceful
- * if JS never runs). Hidden on touch / no-hover devices. */
+/* ---------- Cursor — small circle + refraction lens + particle aura ----
+ * A JS follower (in info.js + main.js) builds the .cursor wrapper, tracks
+ * the pointer 1:1, injects the SVG refraction filter, and adds .cursor-none
+ * to <html> so the OS arrow is hidden only once the cursor is live (graceful
+ * if JS never runs). The lens uses backdrop-filter: url(#cursor-refract) to
+ * warp + hue-shift the background behind it like light bending round a
+ * black hole; a constellation of tiny motes orbits as an aura. Hidden on
+ * touch / no-hover / reduced-motion. */
 html.cursor-none,
 html.cursor-none * { cursor: none; }
-.cursor-dot {
+
+.cursor {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 9999;
+  pointer-events: none;
+  transform: translate3d(-300px, -300px, 0);
+  will-change: transform;
+}
+
+/* The small circle the user likes — size kept. */
+.cursor-dot {
+  position: absolute;
   top: 0;
   left: 0;
   width: 20px;
   height: 20px;
-  margin: -10px 0 0 -10px;          /* center the ring on the point */
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  margin: -10px 0 0 -10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.88);
   border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate3d(-100px, -100px, 0);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22), 0 0 6px rgba(0, 0, 0, 0.18);
   transition: width 160ms var(--ease-out), height 160ms var(--ease-out),
               margin 160ms var(--ease-out), background-color 160ms var(--ease-out),
               border-color 160ms var(--ease-out);
-  will-change: transform;
 }
-.cursor-dot::after {            /* tiny precise center dot */
+.cursor-dot::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -1845,17 +1861,65 @@ html.cursor-none * { cursor: none; }
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
 }
-.cursor-dot.is-hover {            /* grows over links/buttons */
+.cursor.is-hover .cursor-dot {
   width: 34px;
   height: 34px;
   margin: -17px 0 0 -17px;
   background-color: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.95);
 }
-.cursor-dot.is-down { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+.cursor.is-down .cursor-dot { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+
+/* Refraction lens — warps + colour-shifts the backdrop (black-hole feel). */
+.cursor-lens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 116px;
+  height: 116px;
+  margin: -58px 0 0 -58px;
+  border-radius: 50%;
+  -webkit-backdrop-filter: url(#cursor-refract) saturate(1.5);
+  backdrop-filter: url(#cursor-refract) saturate(1.5);
+  background:
+    radial-gradient(circle, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.10) 34%, transparent 60%),
+    radial-gradient(circle, transparent 54%, rgba(255, 70, 140, 0.13) 62%, rgba(140, 110, 255, 0.10) 70%, rgba(80, 220, 255, 0.13) 78%, transparent 88%);
+  box-shadow: 0 0 26px 6px rgba(130, 170, 255, 0.05);
+  transition: width 220ms var(--ease-out), height 220ms var(--ease-out), margin 220ms var(--ease-out);
+}
+.cursor.is-hover .cursor-lens { width: 150px; height: 150px; margin: -75px 0 0 -75px; }
+.cursor.is-down  .cursor-lens { width: 92px;  height: 92px;  margin: -46px 0 0 -46px; }
+
+/* Aura — a slowly spinning constellation of tiny motes (built in JS). */
+.cursor-aura {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  animation: cursor-aura-spin 7s linear infinite;
+}
+.cursor-aura i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+  animation: cursor-aura-twinkle 2.4s ease-in-out infinite;
+}
+@keyframes cursor-aura-spin { to { transform: rotate(360deg); } }
+@keyframes cursor-aura-twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
+
+.cursor--reduced .cursor-lens,
+.cursor--reduced .cursor-aura { display: none; }
+
 @media (hover: none) {
   html.cursor-none, html.cursor-none * { cursor: auto; }
-  .cursor-dot { display: none; }
+  .cursor { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-lens, .cursor-aura { display: none; }
 }
 
 /* ---------- Work-page applications of the glass system ---------- */

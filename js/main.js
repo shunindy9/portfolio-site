@@ -632,17 +632,53 @@
   }
 
   /* ============================================================
-   * CURSOR DOT — a small circle that follows the pointer 1:1 and
-   * replaces the OS arrow. Built in JS so the native cursor is only
-   * hidden (.cursor-none on <html>) once the dot is live. Skipped on
-   * touch / no-hover devices. Shared verbatim with info.js.
+   * CURSOR — a small circle wrapped in a refraction lens that warps +
+   * hue-shifts the backdrop behind it (light bending round a black
+   * hole) plus a constellation of tiny orbiting motes. Native arrow is
+   * hidden only once the cursor is live. Skipped on touch / no-hover;
+   * lens + aura drop on reduced motion. Shared verbatim with info.js.
    * ============================================================ */
   function initCursorDot() {
     if (!hasHover) return;
-    const dot = document.createElement("div");
-    dot.className = "cursor-dot";
-    document.body.appendChild(dot);
+    const reduce = reduceMotion;
+
+    if (!document.getElementById("cursor-refract")) {
+      const holder = document.createElement("div");
+      holder.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
+      holder.setAttribute("aria-hidden", "true");
+      holder.innerHTML =
+        '<svg width="0" height="0"><defs>' +
+        '<filter id="cursor-refract" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.014 0.016" numOctaves="2" seed="6" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="32" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
+        '<feColorMatrix in="d" type="hueRotate" values="0">' +
+        '<animate attributeName="values" from="0" to="360" dur="6s" repeatCount="indefinite"/>' +
+        '</feColorMatrix></filter></defs></svg>';
+      document.body.appendChild(holder);
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "cursor" + (reduce ? " cursor--reduced" : "");
+    wrap.innerHTML = '<div class="cursor-lens"></div><div class="cursor-aura"></div><div class="cursor-dot"></div>';
+    document.body.appendChild(wrap);
     document.documentElement.classList.add("cursor-none");
+
+    if (!reduce) {
+      const aura = wrap.querySelector(".cursor-aura");
+      const COLORS = ["rgba(120,220,255,0.9)", "rgba(255,180,90,0.85)", "rgba(255,90,160,0.8)", "rgba(170,140,255,0.85)"];
+      for (let i = 0; i < 7; i++) {
+        const ang = (i / 7) * Math.PI * 2 + Math.random() * 0.6;
+        const rad = 26 + Math.random() * 16;
+        const sz = 2 + Math.random() * 1.8;
+        const mote = document.createElement("i");
+        mote.style.cssText =
+          `width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;background:${COLORS[i % COLORS.length]};` +
+          `transform:translate(${(Math.cos(ang) * rad).toFixed(1)}px,${(Math.sin(ang) * rad).toFixed(1)}px);` +
+          `animation-delay:${(-Math.random() * 3).toFixed(2)}s`;
+        aura.appendChild(mote);
+      }
+    }
+
     let x = 0, y = 0, pending = false;
     window.addEventListener("pointermove", (e) => {
       x = e.clientX; y = e.clientY;
@@ -650,17 +686,17 @@
       pending = true;
       requestAnimationFrame(() => {
         pending = false;
-        dot.style.transform = `translate3d(${x}px,${y}px,0)`;
+        wrap.style.transform = `translate3d(${x}px,${y}px,0)`;
       });
     }, { passive: true });
-    window.addEventListener("pointerdown", () => dot.classList.add("is-down"));
-    window.addEventListener("pointerup", () => dot.classList.remove("is-down"));
+    window.addEventListener("pointerdown", () => wrap.classList.add("is-down"));
+    window.addEventListener("pointerup", () => wrap.classList.remove("is-down"));
     const INTERACTIVE = "a,button,input,label,select,textarea,summary,[role=button]";
     document.addEventListener("pointerover", (e) => {
-      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.add("is-hover");
+      if (e.target.closest && e.target.closest(INTERACTIVE)) wrap.classList.add("is-hover");
     });
     document.addEventListener("pointerout", (e) => {
-      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.remove("is-hover");
+      if (e.target.closest && e.target.closest(INTERACTIVE)) wrap.classList.remove("is-hover");
     });
   }
 
