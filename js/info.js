@@ -9,6 +9,39 @@
   var qa = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
   /* --------------------------------------------------------------
+   * CURSOR DOT — a small circle that follows the pointer 1:1 and
+   * replaces the OS arrow. Built in JS so the native cursor is only
+   * hidden (.cursor-none on <html>) once the dot is actually live.
+   * Skipped on touch / no-hover devices. Shared verbatim with main.js.
+   * -------------------------------------------------------------- */
+  function initCursorDot() {
+    if (!window.matchMedia("(hover: hover)").matches) return;
+    var dot = document.createElement("div");
+    dot.className = "cursor-dot";
+    document.body.appendChild(dot);
+    document.documentElement.classList.add("cursor-none");
+    var x = 0, y = 0, pending = false;
+    window.addEventListener("pointermove", function (e) {
+      x = e.clientX; y = e.clientY;
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        dot.style.transform = "translate3d(" + x + "px," + y + "px,0)";
+      });
+    }, { passive: true });
+    window.addEventListener("pointerdown", function () { dot.classList.add("is-down"); });
+    window.addEventListener("pointerup", function () { dot.classList.remove("is-down"); });
+    var INTERACTIVE = "a,button,input,label,select,textarea,summary,[role=button]";
+    document.addEventListener("pointerover", function (e) {
+      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.add("is-hover");
+    });
+    document.addEventListener("pointerout", function (e) {
+      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.remove("is-hover");
+    });
+  }
+
+  /* --------------------------------------------------------------
    * I18N — mirrors main.js. CONFIG holds English at the top level,
    * CONFIG.ja mirrors keys for Japanese; missing JA keys fall back.
    * The chosen language persists in localStorage so it carries
@@ -128,72 +161,6 @@
   }
 
   /* --------------------------------------------------------------
-   * CONTROL LAUNCH — warp into the background: video zooms, the
-   * flash blooms, a one-shot particle burst radiates from center,
-   * then we navigate. control.html reads the sessionStorage flag
-   * and plays its entrance. is-returning reverses on the way back.
-   * -------------------------------------------------------------- */
-  function particleBurst() {
-    var c = document.createElement("canvas");
-    c.style.cssText = "position:fixed;inset:0;z-index:55;pointer-events:none";
-    document.body.appendChild(c);
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    c.width = window.innerWidth * dpr;
-    c.height = window.innerHeight * dpr;
-    var ctx = c.getContext("2d");
-    ctx.scale(dpr, dpr);
-    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-    var COLORS = ["#FFB35C", "#4FD6E0", "#fff1a8", "#ff14d4"];
-    var parts = [];
-    for (var i = 0; i < 140; i++) {
-      var a = Math.random() * Math.PI * 2;
-      var sp = 4 + Math.random() * 14;
-      parts.push({
-        x: cx, y: cy,
-        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        r: 0.8 + Math.random() * 2.2,
-        col: COLORS[(Math.random() * COLORS.length) | 0]
-      });
-    }
-    var start = performance.now();
-    (function draw(now) {
-      var t = (now - start) / 700;
-      if (t >= 1) { c.remove(); return; }
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      ctx.globalAlpha = 1 - t;
-      for (var j = 0; j < parts.length; j++) {
-        var p = parts[j];
-        p.x += p.vx; p.y += p.vy;
-        p.vx *= 1.04; p.vy *= 1.04;
-        ctx.fillStyle = p.col;
-        ctx.fillRect(p.x, p.y, p.r, p.r * 3);
-      }
-      requestAnimationFrame(draw);
-    })(start);
-  }
-
-  var controlBtn = document.getElementById("control-launch");
-  if (controlBtn) {
-    controlBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      try { sessionStorage.setItem("cockpit-transition", "in"); } catch (_) {}
-      if (reduceMotion) { location.href = controlBtn.href; return; }
-      document.body.classList.add("is-warping");
-      particleBurst();
-      setTimeout(function () { location.href = controlBtn.href; }, 730);
-    });
-  }
-  try {
-    if (sessionStorage.getItem("cockpit-transition") === "out") {
-      sessionStorage.removeItem("cockpit-transition");
-      if (!reduceMotion) {
-        document.body.classList.add("is-returning");
-        setTimeout(function () { document.body.classList.remove("is-returning"); }, 950);
-      }
-    }
-  } catch (_) {}
-
-  /* --------------------------------------------------------------
    * Clocks — JST for any .jst-clock, plus the world-clock ticker.
    * The ticker belt slides via pure CSS transform; we only re-render
    * its textContent every 30s so the motion is never disturbed.
@@ -265,18 +232,9 @@
     root.style.setProperty("--flash-opacity", flash.toFixed(3));
   }
 
-  var lensCore = document.querySelector(".info-bg-lens-core");
-
   function applyPointer() {
     pendingPointer = false;
-    root.style.setProperty("--mouse-x", (lastPointer.x * 100).toFixed(2) + "%");
-    root.style.setProperty("--mouse-y", (lastPointer.y * 100).toFixed(2) + "%");
-    // Hue-cycling core rides the cursor on a compositor-only transform.
-    if (lensCore) {
-      lensCore.style.transform =
-        "translate3d(" + (lastPointer.x * window.innerWidth).toFixed(1) + "px," +
-        (lastPointer.y * window.innerHeight).toFixed(1) + "px,0)";
-    }
+    // Cursor vertical distance from center nudges the video saturation.
     var dy = Math.abs(lastPointer.y - 0.5) * 2;
     var sat = 1.4 + dy * 1.4;
     root.style.setProperty("--bg-sat", sat.toFixed(2));
@@ -309,6 +267,8 @@
   // Initial paint.
   applyScroll();
   applyPointer();
+
+  initCursorDot();
 
   /* --------------------------------------------------------------
    * Reveal-on-scroll. Adding .is-in also kicks off the line-art logo

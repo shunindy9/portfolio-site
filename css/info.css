@@ -73,60 +73,6 @@
     linear-gradient(180deg, rgba(13,11,7,0.25) 0%, rgba(13,11,7,0.55) 60%, rgba(13,11,7,0.78) 100%);
 }
 
-/* Cursor reveal lens — the legibility hero. The inner radial DARKENS the
- * video locally (raising contrast under whatever the cursor approaches);
- * the thin amber→magenta→cyan ring outside it reads as the lens glass.
- * Replaces the old color-dodge lens, which brightened the background and
- * cost contrast. Pure CSS-variable driven; JS only flips --mouse-x/y.
- * Sits at z-index 1 — above video/scrim, below all text (z-index 2). */
-.info-bg-lens {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      circle 86px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(4, 6, 10, 0.42) 0%,
-      rgba(4, 6, 10, 0.26) 45%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 98px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      transparent 60%,
-      rgba(255, 179, 92, 0.22) 67%,
-      rgba(255, 20, 212, 0.13) 72%,
-      rgba(79, 214, 224, 0.20) 77%,
-      transparent 84%
-    );
-  /* No transition on background — same reason as the video filter. */
-}
-
-/* Lens core — a soft color bloom in the middle of the ring that cycles
- * through the spectrum over time. A small (110px) element moved with
- * transform from the same rAF as the lens, so the hue-rotate animation
- * runs on a tiny compositor layer, never the full viewport. */
-.info-bg-lens-core {
-  position: fixed;
-  top: -29px;
-  left: -29px;
-  width: 58px;
-  height: 58px;
-  z-index: 1;
-  pointer-events: none;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 80, 60, 0.50) 0%, rgba(255, 80, 60, 0.18) 45%, transparent 70%);
-  mix-blend-mode: screen;
-  animation: lens-hue-cycle 9s linear infinite;
-  will-change: transform, filter;
-}
-@keyframes lens-hue-cycle {
-  to { filter: hue-rotate(360deg); }
-}
-@media (hover: none), (prefers-reduced-motion: reduce) {
-  .info-bg-lens, .info-bg-lens-core { display: none; }
-}
-
 /* Flash from below — fires when the user reaches the end of the scroll.
  * Fixed pseudo, opacity scrubbed from 0 to 1 over the last 8% of the
  * page scroll. Looks like ground-level light bleeding up through the
@@ -155,28 +101,6 @@
   mix-blend-mode: screen;
 }
 
-/* Warp transition — CONTROL launch. The video zooms toward the viewer
- * while the flash blooms; control.js picks up on the other side via a
- * sessionStorage flag. is-returning plays the reverse on the way back. */
-body.is-warping .info-bg-video {
-  transition: transform 720ms cubic-bezier(0.6, 0, 0.85, 1);
-  transform: scale(1.7);
-}
-body.is-warping .info-flash {
-  opacity: 1;
-  transition: opacity 560ms ease-in;
-}
-body.is-returning .info-bg-video {
-  animation: warp-return 850ms var(--ease-out) both;
-}
-@keyframes warp-return {
-  from { transform: scale(1.35); }
-  to   { transform: scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  body.is-warping .info-bg-video,
-  body.is-returning .info-bg-video { transition: none; animation: none; transform: none; }
-}
 
 /* Click pulse — boost saturation briefly, like a flashbulb pop. The
  * .is-pulsing body class is toggled by JS for ~400ms after each click. */

@@ -632,51 +632,36 @@
   }
 
   /* ============================================================
-   * SPOTLIGHT — cursor reveal lens. Feeds --mouse-x/--mouse-y to the
-   * fixed .spotlight overlay (style.css), which darkens the shader
-   * locally to RAISE contrast under the cursor. rAF-coalesced; the
-   * overlay itself is pure CSS gradients, zero per-frame JS cost
-   * beyond two custom-property writes.
+   * CURSOR DOT — a small circle that follows the pointer 1:1 and
+   * replaces the OS arrow. Built in JS so the native cursor is only
+   * hidden (.cursor-none on <html>) once the dot is live. Skipped on
+   * touch / no-hover devices. Shared verbatim with info.js.
    * ============================================================ */
-  /* ============================================================
-   * CONTROL LAUNCH — work page version: quick light flash, set the
-   * transition flag, navigate. (The full video-warp lives on the
-   * home page; the work page has the shader instead.)
-   * ============================================================ */
-  function initControlLaunch() {
-    const btn = document.getElementById("control-launch");
-    if (!btn) return;
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      try { sessionStorage.setItem("cockpit-transition", "in"); } catch (_) {}
-      if (reduceMotion) { location.href = btn.href; return; }
-      const flash = document.createElement("div");
-      flash.style.cssText =
-        "position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;" +
-        "background:radial-gradient(80% 80% at 50% 50%, #fff8ea 0%, rgba(255,220,160,0.9) 40%, rgba(79,214,224,0.5) 70%, transparent 100%);" +
-        "transition:opacity 480ms ease-in";
-      document.body.appendChild(flash);
-      requestAnimationFrame(() => { flash.style.opacity = "1"; });
-      setTimeout(() => { location.href = btn.href; }, 520);
-    });
-  }
-
-  function initSpotlight() {
-    if (!q(".spotlight") || !hasHover) return;
-    const root = document.documentElement;
-    let pending = false;
-    let px = 0.5, py = 0.5;
+  function initCursorDot() {
+    if (!hasHover) return;
+    const dot = document.createElement("div");
+    dot.className = "cursor-dot";
+    document.body.appendChild(dot);
+    document.documentElement.classList.add("cursor-none");
+    let x = 0, y = 0, pending = false;
     window.addEventListener("pointermove", (e) => {
-      px = e.clientX / window.innerWidth;
-      py = e.clientY / window.innerHeight;
+      x = e.clientX; y = e.clientY;
       if (pending) return;
       pending = true;
       requestAnimationFrame(() => {
         pending = false;
-        root.style.setProperty("--mouse-x", (px * 100).toFixed(2) + "%");
-        root.style.setProperty("--mouse-y", (py * 100).toFixed(2) + "%");
+        dot.style.transform = `translate3d(${x}px,${y}px,0)`;
       });
     }, { passive: true });
+    window.addEventListener("pointerdown", () => dot.classList.add("is-down"));
+    window.addEventListener("pointerup", () => dot.classList.remove("is-down"));
+    const INTERACTIVE = "a,button,input,label,select,textarea,summary,[role=button]";
+    document.addEventListener("pointerover", (e) => {
+      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.add("is-hover");
+    });
+    document.addEventListener("pointerout", (e) => {
+      if (e.target.closest && e.target.closest(INTERACTIVE)) dot.classList.remove("is-hover");
+    });
   }
 
   /* ============================================================
@@ -1253,8 +1238,7 @@
     runHeroEntrance();
     runScrollReveals();
     initMagnetic();
-    initSpotlight();
-    initControlLaunch();
+    initCursorDot();
     initWordmarkParallax();
     initPulseBeams();
     initShaderZoom();

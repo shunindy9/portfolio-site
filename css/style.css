@@ -1809,80 +1809,53 @@ body.is-loud-beat .status__dot {
   93%      { opacity: 0.97; }
 }
 
-/* ---------- CONTROL button — top-left, every page ---------- */
-.control-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink);
-  border-radius: 999px;
-  cursor: pointer;
-  animation: control-float 4.5s ease-in-out infinite;
-  transition: transform 240ms var(--ease-snap), box-shadow 240ms var(--ease-out);
-}
-.control-btn .control-btn__glyph {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  color: var(--neo-amber);
-}
-.control-btn:hover,
-.control-btn:focus-visible {
-  transform: translateY(-1px) scale(1.04);
-  box-shadow:
-    inset 1px 1px 0 var(--glass-highlight),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 18px rgba(255, 179, 92, 0.35),
-    0 12px 32px -12px rgba(0, 0, 0, 0.50);
-}
-.control-btn[data-standby] {
-  opacity: 0.62;
-  cursor: default;
-}
-.control-btn[data-standby]:hover { transform: none; }
-@keyframes control-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-
-/* ---------- .spotlight — cursor reveal lens (work page) ----------
- * A fixed overlay whose darkening core RAISES contrast under the cursor
- * and whose thin amber→magenta→cyan rim reads as the lens itself.
- * Driven by the same --mouse-x/--mouse-y rAF pipeline as the info page.
- * Sits above the shader background, below all content. */
-.spotlight {
+/* ---------- Cursor — a small circle that follows the pointer ----------
+ * Replaces the old reveal-lens. A JS follower (in info.js + main.js)
+ * creates the element, tracks the pointer 1:1, and adds .cursor-none to
+ * <html> so the OS arrow is hidden only once the dot is live (graceful
+ * if JS never runs). Hidden on touch / no-hover devices. */
+html.cursor-none,
+html.cursor-none * { cursor: none; }
+.cursor-dot {
   position: fixed;
-  inset: 0;
-  z-index: 0; /* above the fixed shader host (-1), below positioned content */
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;          /* center the ring on the point */
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
   pointer-events: none;
-  background:
-    radial-gradient(
-      circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(4, 6, 10, 0.42) 0%,
-      rgba(4, 6, 10, 0.26) 45%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 330px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      transparent 62%,
-      rgba(255, 179, 92, 0.16) 68%,
-      rgba(255, 20, 212, 0.10) 72%,
-      rgba(79, 214, 224, 0.16) 76%,
-      transparent 82%
-    );
+  z-index: 9999;
+  transform: translate3d(-100px, -100px, 0);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22), 0 0 6px rgba(0, 0, 0, 0.18);
+  transition: width 160ms var(--ease-out), height 160ms var(--ease-out),
+              margin 160ms var(--ease-out), background-color 160ms var(--ease-out),
+              border-color 160ms var(--ease-out);
+  will-change: transform;
 }
+.cursor-dot::after {            /* tiny precise center dot */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+.cursor-dot.is-hover {            /* grows over links/buttons */
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+.cursor-dot.is-down { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
 @media (hover: none) {
-  .spotlight { display: none; }
+  html.cursor-none, html.cursor-none * { cursor: auto; }
+  .cursor-dot { display: none; }
 }
 
 /* ---------- Work-page applications of the glass system ---------- */
@@ -1909,8 +1882,6 @@ body.is-loud-beat .status__dot {
   .glass--flat::after,
   .glass::before { animation: none; content: none; }
   .bulb:hover, .bulb:focus-visible, .bulb.is-hot { animation: none; }
-  .control-btn { animation: none; }
-  .spotlight { display: none; }
 }
 
 /* ===========================================================================
