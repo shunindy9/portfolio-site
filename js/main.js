@@ -645,23 +645,14 @@
       const holder = document.createElement("div");
       holder.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
       holder.setAttribute("aria-hidden", "true");
-      // Chromatic refraction: warp the backdrop, then displace its R/G/B
-      // channels by different amounts and screen-blend them back. The
-      // colour comes entirely from the background it bends (no animation,
-      // no overlay) — so it "changes colours around the circle" as it
-      // passes over different parts of the scene.
+      // Pure refraction: warp the backdrop with one displacement so all
+      // channels move together — bends/distorts the scene without any
+      // colour shift. No animation, no overlay.
       holder.innerHTML =
         '<svg width="0" height="0"><defs>' +
         '<filter id="cursor-refract" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">' +
         '<feTurbulence type="fractalNoise" baseFrequency="0.008 0.01" numOctaves="2" seed="6" result="n"/>' +
-        '<feDisplacementMap in="SourceGraphic" in2="n" scale="74" xChannelSelector="R" yChannelSelector="G" result="rd"/>' +
-        '<feColorMatrix in="rd" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>' +
-        '<feDisplacementMap in="SourceGraphic" in2="n" scale="54" xChannelSelector="R" yChannelSelector="G" result="gd"/>' +
-        '<feColorMatrix in="gd" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>' +
-        '<feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G" result="bd"/>' +
-        '<feColorMatrix in="bd" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>' +
-        '<feBlend in="r" in2="g" mode="screen" result="rg"/>' +
-        '<feBlend in="rg" in2="b" mode="screen"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="74" xChannelSelector="R" yChannelSelector="G"/>' +
         '</filter></defs></svg>';
       document.body.appendChild(holder);
     }
