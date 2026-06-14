@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=2026061301" />
-  <link rel="stylesheet" href="css/control.css?v=2026061301" />
+  <link rel="stylesheet" href="css/style.css?v=2026061302" />
+  <link rel="stylesheet" href="css/control.css?v=2026061302" />
 
   <!-- The cockpit is always dark — a spaceship at night. -->
   <script>document.documentElement.setAttribute("data-theme", "dark");</script>
@@ -33,8 +33,7 @@
 <body class="control-page">
 
   <!-- Space outside the windshield — same loop as the home page, crushed
-       almost to black so the specimen lab owns the light (Image 3:
-       pure black field). -->
+       almost to black so the specimen lab owns the light. -->
   <video class="control-bg-video" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
     <source src="assets/video/hj-bg.mp4?v=20260610b" type="video/mp4" />
   </video>
@@ -46,13 +45,33 @@
   <a class="skip-link" href="#deck">Skip to control deck</a>
 
   <header class="control-header">
-    <a class="control-btn glass is-lit" href="index.html" id="exit-top" aria-label="Exit control mode">
-      <svg class="control-btn__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M19 12H5"/>
-        <path d="m11 18-6-6 6-6"/>
-      </svg>
-      <span class="control-btn__label">Exit</span>
-    </a>
+    <!-- EXIT with the signature orbiting it (HUD type, never over panels) -->
+    <div class="exit-orbit">
+      <div class="orbit-sign" aria-hidden="true">
+        <svg viewBox="0 0 190 74">
+          <defs>
+            <path id="orbit-rect" d="M 24 7 H 166 Q 183 7 183 24 V 50 Q 183 67 166 67 H 24 Q 7 67 7 50 V 24 Q 7 7 24 7 Z" />
+          </defs>
+          <text class="orbit-sign__text">
+            <textPath href="#orbit-rect" startOffset="0">
+              SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
+              <animate attributeName="startOffset" from="0%" to="-100%" dur="16s" repeatCount="indefinite" />
+            </textPath>
+            <textPath href="#orbit-rect" startOffset="100%">
+              SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
+              <animate attributeName="startOffset" from="100%" to="0%" dur="16s" repeatCount="indefinite" />
+            </textPath>
+          </text>
+        </svg>
+      </div>
+      <a class="control-btn glass is-lit" href="index.html" id="exit-top" aria-label="Exit control mode">
+        <svg class="control-btn__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5"/>
+          <path d="m11 18-6-6 6-6"/>
+        </svg>
+        <span class="control-btn__label">Exit</span>
+      </a>
+    </div>
     <div class="control-meta world-ticker" aria-label="World clocks">
       <div class="world-ticker__belt">
         <span class="world-ticker__seq" data-ticker-seq>TOKYO --:--</span>
@@ -61,16 +80,15 @@
     </div>
   </header>
 
-  <!-- ====================== SPECIMEN LAB STAGE ======================
-       Image-3 hologram: a cyan wireframe lattice with stacked strata
-       (clouds / greenery / grids / water) and the current specimen
-       (planet or visitor) suspended inside. Flanked by glowing data
-       columns, all on a near-black field. -->
+  <!-- ====================== SPECIMEN LAB STAGE ====================== -->
   <main class="stage" aria-label="Specimen lab">
     <canvas id="scene-canvas" aria-hidden="true"></canvas>
 
-    <!-- No-WebGL fallback: a static wireframe lattice (SVG) so the page
-         still reads as a lab; all information lives in DOM panels. -->
+    <!-- Particle projection layer — the hero reveal. Sits over the 3D
+         lattice, under the crisp hologram panel. -->
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+    <!-- No-WebGL fallback -->
     <div class="stage__fallback" hidden aria-hidden="true">
       <svg viewBox="0 0 200 280" fill="none" stroke="currentColor" stroke-width="1">
         <rect x="40" y="20" width="120" height="240"/>
@@ -81,8 +99,7 @@
       </svg>
     </div>
 
-    <!-- Flanking data columns — green telemetry left, amber right
-         (Image 3's glowing terminal text). Populated + scrambled by JS. -->
+    <!-- Flanking data columns — green telemetry left, amber right. -->
     <div class="data-col data-col--left" aria-hidden="true"></div>
     <div class="data-col data-col--right" aria-hidden="true">
       <div class="data-col__thumbs">
@@ -92,10 +109,10 @@
       </div>
     </div>
 
-    <p class="stage__hint" id="stage-hint">DRAG TO SPIN · SCROLL TO ZOOM · SPECIMEN CHAMBER ACTIVE</p>
+    <p class="stage__hint" id="stage-hint">DRAG TO SPIN · SCROLL TO ZOOM · PROJECTION CHAMBER ACTIVE</p>
 
-    <!-- Hologram panels — liquid glass, one open at a time. -->
-    <section class="holo glass" id="holo" hidden aria-live="polite">
+    <!-- Crisp hologram panel — fades in over the assembled particles. -->
+    <section class="holo" id="holo" hidden aria-live="polite">
       <button class="holo__close" id="holo-close" aria-label="Close panel">✕</button>
 
       <div class="holo__pane" data-pane="contact" hidden>
@@ -143,42 +160,31 @@
     </section>
   </main>
 
-  <!-- Orbiting signature — text loops around a small box like a worm. -->
-  <div class="orbit-sign" aria-hidden="true">
-    <svg viewBox="0 0 150 90">
-      <defs>
-        <path id="orbit-rect" d="M 20 8 H 130 Q 142 8 142 20 V 70 Q 142 82 130 82 H 20 Q 8 82 8 70 V 20 Q 8 8 20 8 Z" />
-      </defs>
-      <text class="orbit-sign__text">
-        <textPath href="#orbit-rect" startOffset="0">
-          SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
-          <animate attributeName="startOffset" from="0%" to="-100%" dur="14s" repeatCount="indefinite" />
-        </textPath>
-        <textPath href="#orbit-rect" startOffset="100%">
-          SHUNSUKE OTSUKI · 2026 — SHUNSUKE OTSUKI · 2026 —
-          <animate attributeName="startOffset" from="100%" to="0%" dur="14s" repeatCount="indefinite" />
-        </textPath>
-      </text>
-    </svg>
-  </div>
-
   <!-- ====================== CONTROL DECK ======================
-       Mœbius layout (radar scope, gridded buttons, cream keyboard,
-       lever faders, dense modules) rendered with Syd Mead materials
-       (brushed metal, walnut bullnose, backlit jewel keys, grain). -->
+       Holographic projections bolted into weathered iron. Mœbius
+       density, mecha-anime cel palette, rust + hazard wear. -->
   <section class="deck" id="deck" aria-label="Control deck">
     <div class="deck__cable" aria-hidden="true">
       <svg viewBox="0 0 1200 40" preserveAspectRatio="none">
-        <path d="M0 30 C 140 6, 240 38, 380 18 S 640 4, 780 24 S 1060 36, 1200 12" fill="none" stroke="#FF8A1E" stroke-width="2.5" opacity="0.7"/>
-        <path d="M0 14 C 160 34, 300 8, 470 28 S 760 38, 920 10 S 1100 22, 1200 30" fill="none" stroke="#1a222c" stroke-width="3" opacity="0.8"/>
+        <path d="M0 30 C 140 6, 240 38, 380 18 S 640 4, 780 24 S 1060 36, 1200 12" fill="none" stroke="#FF7A1E" stroke-width="2.5" opacity="0.6"/>
+        <path d="M0 14 C 160 34, 300 8, 470 28 S 760 38, 920 10 S 1100 22, 1200 30" fill="none" stroke="#11181d" stroke-width="3" opacity="0.85"/>
       </svg>
     </div>
+
+    <!-- Encrypted crawl across the deck's top edge -->
+    <div class="crypt-ticker" aria-hidden="true">
+      <div class="crypt-ticker__belt">
+        <span class="crypt-ticker__seq" data-crypt-seq></span>
+        <span class="crypt-ticker__seq" data-crypt-seq></span>
+      </div>
+    </div>
+
     <div class="deck__indicator" aria-hidden="true"></div>
     <div class="deck__grain" aria-hidden="true"></div>
 
     <div class="deck__inner">
 
-      <!-- LEFT BAY — orange-sphere radar scope (Image 1's hero) -->
+      <!-- ORB SCOPE — orange-sphere radar -->
       <div class="deck-module deck-module--radar" aria-hidden="true">
         <div class="radar">
           <div class="radar__spokes"></div>
@@ -188,8 +194,14 @@
         <span class="deck-module__tag">ORB SCOPE</span>
       </div>
 
-      <!-- HOLOGRAM BUS — backlit jewel rockers (the functional keys) -->
-      <div class="deck-module deck-module--keys" role="group" aria-label="Hologram keys">
+      <!-- WAVE SCOPE — phosphor oscilloscope -->
+      <div class="deck-module deck-module--scope" aria-hidden="true">
+        <canvas id="scope-canvas" width="132" height="56"></canvas>
+        <span class="deck-module__tag">WAVE SCOPE</span>
+      </div>
+
+      <!-- HOLOGRAM BUS — the functional keys (drive the particle reveal) -->
+      <div class="deck-module deck-module--keys hazard-top" role="group" aria-label="Hologram keys">
         <span class="deck-module__tag">HOLOGRAM BUS</span>
         <div class="rocker-row">
           <button class="rocker rocker--amber" type="button" data-holo="contact"><i aria-hidden="true"></i>CONTACT</button>
@@ -204,7 +216,7 @@
         </div>
       </div>
 
-      <!-- CREAM KEYBOARD — decorative, straight out of Image 1 -->
+      <!-- INPUT — cream keyboard (decorative) -->
       <div class="deck-module deck-module--keyboard" aria-hidden="true">
         <span class="deck-module__tag">INPUT</span>
         <div class="keys">
@@ -212,15 +224,30 @@
           <div class="keys-row"><b></b><b></b><b class="kc--red"></b><b></b><b></b><b></b><b></b><b></b><b class="kc--blue"></b><b></b><b></b><b></b><b></b></div>
           <div class="keys-row"><b></b><b></b><b></b><b class="kc--space"></b><b></b><b class="kc--orange"></b><b></b></div>
         </div>
+        <div class="btn-grid btn-grid--wide" aria-hidden="true">
+          <b></b><b class="bg--red"></b><b></b><b></b><b class="bg--blue"></b><b></b><b class="bg--red"></b><b></b><b></b>
+        </div>
       </div>
 
-      <!-- AUX — lever faders + mute lever -->
-      <div class="deck-module deck-module--faders" role="group" aria-label="Audio">
-        <span class="deck-module__tag">AUX</span>
-        <div class="fader-row">
-          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.78"></span></span>
-          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.42"></span></span>
-          <span class="fader" aria-hidden="true"><span class="fader__lever" style="--p:0.6"></span></span>
+      <!-- TRIM — live sliders feeding the particle projection -->
+      <div class="deck-module deck-module--trim" role="group" aria-label="Projection trim">
+        <span class="deck-module__tag">TRIM</span>
+        <div class="trim-row">
+          <label class="trim">
+            <span class="trim__readout" id="trim-flux-val">62</span>
+            <input type="range" id="trim-flux" min="0" max="100" value="62" aria-label="Flux" />
+            <span class="trim__name">FLUX</span>
+          </label>
+          <label class="trim">
+            <span class="trim__readout" id="trim-gain-val">38</span>
+            <input type="range" id="trim-gain" min="0" max="100" value="38" aria-label="Gain" />
+            <span class="trim__name">GAIN</span>
+          </label>
+          <label class="trim">
+            <span class="trim__readout" id="trim-drift-val">50</span>
+            <input type="range" id="trim-drift" min="0" max="100" value="50" aria-label="Drift" />
+            <span class="trim__name">DRIFT</span>
+          </label>
         </div>
         <label class="deck-switch" for="mute-switch">
           <input type="checkbox" id="mute-switch" />
@@ -229,30 +256,34 @@
         </label>
       </div>
 
-      <!-- SPECIMEN — glossy dome keys swap the entity in the lattice -->
+      <!-- SPECIMEN — swap the entity in the chamber -->
       <div class="deck-module deck-module--scene" role="group" aria-label="Specimen selection">
         <span class="deck-module__tag">SPECIMEN</span>
         <button class="dome-key is-active" type="button" data-scene="planet"><span class="dome dome--amber" aria-hidden="true"></span>PLANET</button>
         <button class="dome-key" type="button" data-scene="visitor"><span class="dome dome--cyan" aria-hidden="true"></span>VISITOR</button>
       </div>
 
-      <!-- CRT READOUTS — green phosphor, scanlined -->
+      <!-- CRT READOUTS -->
       <div class="deck-module deck-module--crt" role="group" aria-label="Live readouts">
         <div class="crt"><span class="crt__label">JST</span><span class="crt__val jst-clock">--:--</span></div>
         <div class="crt"><span class="crt__label">TOKYO</span><span class="crt__val" id="deck-temp">—°</span></div>
       </div>
 
-      <!-- EXIT — guarded red switch -->
+      <!-- EXIT — guarded hazard switch -->
       <a class="exit-key" href="index.html" id="exit-key">
         <span class="exit-key__stripes" aria-hidden="true"></span>
         EXIT
       </a>
     </div>
 
-    <div class="deck__walnut" aria-hidden="true"></div>
+    <div class="deck__rail" aria-hidden="true"></div>
   </section>
 
-  <script defer src="js/config.js?v=2026061301"></script>
-  <script type="module" src="js/control.js?v=2026061301"></script>
+  <!-- Full-cockpit FX: vignette + film grain (static, zero per-frame cost) -->
+  <div class="fx-vignette" aria-hidden="true"></div>
+  <div class="fx-grain" aria-hidden="true"></div>
+
+  <script defer src="js/config.js?v=2026061302"></script>
+  <script type="module" src="js/control.js?v=2026061302"></script>
 </body>
 </html>

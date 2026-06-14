@@ -86,18 +86,18 @@
   pointer-events: none;
   background:
     radial-gradient(
-      circle 165px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      circle 86px at var(--mouse-x, 50%) var(--mouse-y, 50%),
       rgba(4, 6, 10, 0.42) 0%,
       rgba(4, 6, 10, 0.26) 45%,
       transparent 70%
     ),
     radial-gradient(
-      circle 185px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      transparent 62%,
-      rgba(255, 179, 92, 0.20) 68%,
-      rgba(255, 20, 212, 0.12) 72%,
-      rgba(79, 214, 224, 0.18) 76%,
-      transparent 82%
+      circle 98px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      transparent 60%,
+      rgba(255, 179, 92, 0.22) 67%,
+      rgba(255, 20, 212, 0.13) 72%,
+      rgba(79, 214, 224, 0.20) 77%,
+      transparent 84%
     );
   /* No transition on background — same reason as the video filter. */
 }
@@ -108,10 +108,10 @@
  * runs on a tiny compositor layer, never the full viewport. */
 .info-bg-lens-core {
   position: fixed;
-  top: -55px;
-  left: -55px;
-  width: 110px;
-  height: 110px;
+  top: -29px;
+  left: -29px;
+  width: 58px;
+  height: 58px;
   z-index: 1;
   pointer-events: none;
   border-radius: 50%;
