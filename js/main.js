@@ -640,44 +640,37 @@
    * ============================================================ */
   function initCursorDot() {
     if (!hasHover) return;
-    const reduce = reduceMotion;
 
     if (!document.getElementById("cursor-refract")) {
       const holder = document.createElement("div");
       holder.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
       holder.setAttribute("aria-hidden", "true");
+      // Chromatic refraction: warp the backdrop, then displace its R/G/B
+      // channels by different amounts and screen-blend them back. The
+      // colour comes entirely from the background it bends (no animation,
+      // no overlay) — so it "changes colours around the circle" as it
+      // passes over different parts of the scene.
       holder.innerHTML =
         '<svg width="0" height="0"><defs>' +
-        '<filter id="cursor-refract" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">' +
-        '<feTurbulence type="fractalNoise" baseFrequency="0.014 0.016" numOctaves="2" seed="6" result="n"/>' +
-        '<feDisplacementMap in="SourceGraphic" in2="n" scale="32" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
-        '<feColorMatrix in="d" type="hueRotate" values="0">' +
-        '<animate attributeName="values" from="0" to="360" dur="6s" repeatCount="indefinite"/>' +
-        '</feColorMatrix></filter></defs></svg>';
+        '<filter id="cursor-refract" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.008 0.01" numOctaves="2" seed="6" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="74" xChannelSelector="R" yChannelSelector="G" result="rd"/>' +
+        '<feColorMatrix in="rd" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="54" xChannelSelector="R" yChannelSelector="G" result="gd"/>' +
+        '<feColorMatrix in="gd" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G" result="bd"/>' +
+        '<feColorMatrix in="bd" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>' +
+        '<feBlend in="r" in2="g" mode="screen" result="rg"/>' +
+        '<feBlend in="rg" in2="b" mode="screen"/>' +
+        '</filter></defs></svg>';
       document.body.appendChild(holder);
     }
 
     const wrap = document.createElement("div");
-    wrap.className = "cursor" + (reduce ? " cursor--reduced" : "");
-    wrap.innerHTML = '<div class="cursor-lens"></div><div class="cursor-aura"></div><div class="cursor-dot"></div>';
+    wrap.className = "cursor";
+    wrap.innerHTML = '<div class="cursor-lens"></div><div class="cursor-dot"></div>';
     document.body.appendChild(wrap);
     document.documentElement.classList.add("cursor-none");
-
-    if (!reduce) {
-      const aura = wrap.querySelector(".cursor-aura");
-      const COLORS = ["rgba(120,220,255,0.9)", "rgba(255,180,90,0.85)", "rgba(255,90,160,0.8)", "rgba(170,140,255,0.85)"];
-      for (let i = 0; i < 7; i++) {
-        const ang = (i / 7) * Math.PI * 2 + Math.random() * 0.6;
-        const rad = 26 + Math.random() * 16;
-        const sz = 2 + Math.random() * 1.8;
-        const mote = document.createElement("i");
-        mote.style.cssText =
-          `width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;background:${COLORS[i % COLORS.length]};` +
-          `transform:translate(${(Math.cos(ang) * rad).toFixed(1)}px,${(Math.sin(ang) * rad).toFixed(1)}px);` +
-          `animation-delay:${(-Math.random() * 3).toFixed(2)}s`;
-        aura.appendChild(mote);
-      }
-    }
 
     let x = 0, y = 0, pending = false;
     window.addEventListener("pointermove", (e) => {

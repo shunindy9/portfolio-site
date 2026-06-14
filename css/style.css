@@ -115,11 +115,11 @@
   --neo-amber:  #FFB35C;                    /* warm analog-bulb halo      */
   --neo-cyan:   #4FD6E0;                    /* CRT rim light              */
   --space:      #0A0E14;                    /* deep-space surface         */
-  --glass-blur:      16px;
-  --glass-tint:      rgba(8, 12, 18, 0.24);  /* clearer — see-through glass */
-  --glass-tint-flat: rgba(8, 12, 18, 0.34);  /* no-blur fallback variant   */
-  --glass-radius:    26px;                   /* capsule-ish — water tube   */
-  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-blur:      24px;                   /* deep frost = premium glass */
+  --glass-tint:      rgba(10, 14, 20, 0.34);
+  --glass-tint-flat: rgba(10, 14, 20, 0.44); /* no-blur fallback variant   */
+  --glass-radius:    24px;
+  --glass-highlight: rgba(255, 255, 255, 0.14);
 }
 
 /* ===========================================================================
@@ -1693,92 +1693,58 @@ body.is-loud-beat .status__dot {
 .glass,
 .glass--flat {
   position: relative;
-  overflow: hidden; /* clips the specular sweep strip */
-  /* Clear glass: a soft diagonal light-catch + a top water-line sheen
-   * over a LOW tint, with only the faintest edge falloff so the panel
-   * reads see-through and glossy rather than like a dark tube. All
-   * static gradients — zero per-frame cost. */
+  overflow: hidden;
+  /* Refined frosted glass: an even, deeply-blurred pane with a quiet
+   * vertical sheen (lighter at the very top, a touch darker at the
+   * bottom) over the tint. No hard diagonal "shine" — depth comes from
+   * the edge lights and the soft floating shadow below. */
   background:
-    linear-gradient(125deg, transparent 0%, rgba(255, 255, 255, 0.07) 16%, transparent 33%, transparent 63%, rgba(255, 255, 255, 0.05) 77%, transparent 93%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 14%, transparent 22%),
-    linear-gradient(90deg, rgba(2, 4, 8, 0.14) 0%, transparent 5%, transparent 95%, rgba(2, 4, 8, 0.14) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 24%, rgba(0, 0, 0, 0.04) 100%),
     var(--glass-tint);
   border-radius: var(--glass-radius);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    inset 1.5px 1.5px 0 var(--glass-highlight),  /* bright lit top-left edge */
-    inset -1px -1px 0 rgba(255, 255, 255, 0.05),
-    inset 0 0 34px rgba(255, 255, 255, 0.035),   /* faint internal glow      */
-    0 16px 42px -16px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 0 var(--glass-highlight),    /* fine lit top edge        */
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),      /* fine shaded bottom edge  */
+    inset 0 0 46px rgba(0, 0, 0, 0.14),        /* soft inner vignette/depth */
+    0 24px 64px -26px rgba(0, 0, 0, 0.72),     /* big soft floating shadow  */
+    0 4px 14px -6px rgba(0, 0, 0, 0.40);
 }
 .glass {
-  /* brightness lift makes the blurred backdrop feel lit through the glass */
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.05);
-  backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.05);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(128%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(128%);
 }
 .glass--flat {
   background:
-    linear-gradient(125deg, transparent 0%, rgba(255, 255, 255, 0.07) 16%, transparent 33%, transparent 63%, rgba(255, 255, 255, 0.05) 77%, transparent 93%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 14%, transparent 22%),
-    linear-gradient(90deg, rgba(2, 4, 8, 0.14) 0%, transparent 5%, transparent 95%, rgba(2, 4, 8, 0.14) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 24%, rgba(0, 0, 0, 0.04) 100%),
     var(--glass-tint-flat);
 }
 
-/* Caustics — two soft light blobs drifting inside the glass like light
- * refracted through moving water. Transform-only on a ::before layer;
- * runs only while the panel is revealed. (Scoped off cap-grid items,
- * whose ::before is their accent line.) */
+/* Fine analog grain inside the glass — a still, low-contrast noise layer
+ * that gives the frost real texture instead of flat plastic. Static, so
+ * zero per-frame cost. (Scoped off cap-grid items, whose ::before is
+ * their accent line.) */
 .glass::before {
   content: "";
   position: absolute;
-  inset: -25%;
+  inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(32% 26% at 30% 68%, rgba(255, 255, 255, 0.055), transparent 70%),
-    radial-gradient(24% 20% at 72% 28%, rgba(79, 214, 224, 0.05), transparent 70%);
-  transform: translate3d(-3%, -2%, 0);
-  animation: glass-caustic 12s ease-in-out infinite alternate;
-  animation-play-state: paused;
-}
-.glass.is-lit::before,
-.glass.is-in::before { animation-play-state: running; }
-@keyframes glass-caustic {
-  to { transform: translate3d(3%, 2.5%, 0) rotate(1.6deg); }
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23g)' opacity='0.6'/></svg>");
+  background-size: 160px 160px;
 }
 
-/* Specular sweep — a slow diagonal light band crossing the panel, like a
- * reflection sliding over real glass. Transform-only (compositor cheap,
- * never background-position — that repaints every frame) and runs ONLY
- * while the panel is revealed (.is-in from the page observers, or .is-lit
- * set statically on above-the-fold panels). */
+/* A single soft highlight where light catches the top-left of the pane —
+ * static, subtle, no moving sweep. */
 .glass::after,
 .glass--flat::after {
   content: "";
   position: absolute;
-  top: -20%;
-  bottom: -20%;
-  left: -30%;
-  width: 40%;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08) 38%,
-    rgba(255, 255, 255, 0.18) 50%,
-    rgba(255, 255, 255, 0.08) 62%,
-    transparent
-  );
-  transform: translateX(-150%) skewX(-18deg);
-  animation: glass-sweep 9s ease-in-out infinite;
-  animation-play-state: paused;
-}
-.glass.is-lit::after,
-.glass.is-in::after,
-.glass--flat.is-lit::after,
-.glass--flat.is-in::after { animation-play-state: running; }
-@keyframes glass-sweep {
-  0%, 55%   { transform: translateX(-150%) skewX(-18deg); }
-  85%, 100% { transform: translateX(480%)  skewX(-18deg); }
+  background: radial-gradient(130% 90% at 12% -10%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 26%, transparent 52%);
 }
 
 /* ---------- .bulb — neon analog-bulb text glow ---------- */
@@ -1812,14 +1778,15 @@ body.is-loud-beat .status__dot {
   93%      { opacity: 0.97; }
 }
 
-/* ---------- Cursor — small circle + refraction lens + particle aura ----
+/* ---------- Cursor — small circle + a big invisible refraction lens -----
  * A JS follower (in info.js + main.js) builds the .cursor wrapper, tracks
  * the pointer 1:1, injects the SVG refraction filter, and adds .cursor-none
  * to <html> so the OS arrow is hidden only once the cursor is live (graceful
- * if JS never runs). The lens uses backdrop-filter: url(#cursor-refract) to
- * warp + hue-shift the background behind it like light bending round a
- * black hole; a constellation of tiny motes orbits as an aura. Hidden on
- * touch / no-hover / reduced-motion. */
+ * if JS never runs). The lens is a large, edge-feathered backdrop-filter
+ * that warps the real background and splits its colour channels
+ * (chromatic refraction) — no fake light, no particles, no auto colour
+ * cycle; the colours come entirely from the background it bends. Hidden on
+ * touch / no-hover; the lens drops (dot stays) on reduced motion. */
 html.cursor-none,
 html.cursor-none * { cursor: none; }
 
@@ -1831,95 +1798,59 @@ html.cursor-none * { cursor: none; }
   height: 0;
   z-index: 9999;
   pointer-events: none;
-  transform: translate3d(-300px, -300px, 0);
+  transform: translate3d(-400px, -400px, 0);
   will-change: transform;
 }
 
-/* The small circle the user likes — size kept. */
+/* The small circle — small and constant. No glow, no fill. */
 .cursor-dot {
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.88);
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 1.5px solid rgba(255, 255, 255, 0.82);
   border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22), 0 0 6px rgba(0, 0, 0, 0.18);
-  transition: width 160ms var(--ease-out), height 160ms var(--ease-out),
-              margin 160ms var(--ease-out), background-color 160ms var(--ease-out),
-              border-color 160ms var(--ease-out);
+  transition: opacity 160ms var(--ease-out), border-color 160ms var(--ease-out);
 }
 .cursor-dot::after {
   content: "";
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 3px;
-  height: 3px;
-  margin: -1.5px 0 0 -1.5px;
+  width: 2.5px;
+  height: 2.5px;
+  margin: -1.25px 0 0 -1.25px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
 }
-.cursor.is-hover .cursor-dot {
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.95);
-}
-.cursor.is-down .cursor-dot { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+.cursor.is-hover .cursor-dot { border-color: rgba(255, 255, 255, 1); }
+.cursor.is-down  .cursor-dot { opacity: 0.6; }
 
-/* Refraction lens — warps + colour-shifts the backdrop (black-hole feel). */
+/* Refraction lens — large, edge-feathered, pure distortion. The mask
+ * fades the warp out at the rim so there's no hard circular cut; the
+ * element itself is invisible (no background, border or shadow). */
 .cursor-lens {
   position: absolute;
   top: 0;
   left: 0;
-  width: 116px;
-  height: 116px;
-  margin: -58px 0 0 -58px;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
   border-radius: 50%;
-  -webkit-backdrop-filter: url(#cursor-refract) saturate(1.5);
-  backdrop-filter: url(#cursor-refract) saturate(1.5);
-  background:
-    radial-gradient(circle, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.10) 34%, transparent 60%),
-    radial-gradient(circle, transparent 54%, rgba(255, 70, 140, 0.13) 62%, rgba(140, 110, 255, 0.10) 70%, rgba(80, 220, 255, 0.13) 78%, transparent 88%);
-  box-shadow: 0 0 26px 6px rgba(130, 170, 255, 0.05);
-  transition: width 220ms var(--ease-out), height 220ms var(--ease-out), margin 220ms var(--ease-out);
+  -webkit-backdrop-filter: url(#cursor-refract);
+  backdrop-filter: url(#cursor-refract);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, #000 42%, transparent 72%);
+  mask-image: radial-gradient(circle, #000 0%, #000 42%, transparent 72%);
 }
-.cursor.is-hover .cursor-lens { width: 150px; height: 150px; margin: -75px 0 0 -75px; }
-.cursor.is-down  .cursor-lens { width: 92px;  height: 92px;  margin: -46px 0 0 -46px; }
-
-/* Aura — a slowly spinning constellation of tiny motes (built in JS). */
-.cursor-aura {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  animation: cursor-aura-spin 7s linear infinite;
-}
-.cursor-aura i {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: -1.5px 0 0 -1.5px;
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
-  animation: cursor-aura-twinkle 2.4s ease-in-out infinite;
-}
-@keyframes cursor-aura-spin { to { transform: rotate(360deg); } }
-@keyframes cursor-aura-twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
-
-.cursor--reduced .cursor-lens,
-.cursor--reduced .cursor-aura { display: none; }
 
 @media (hover: none) {
   html.cursor-none, html.cursor-none * { cursor: auto; }
   .cursor { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cursor-lens, .cursor-aura { display: none; }
+  .cursor-lens { display: none; }
 }
 
 /* ---------- Work-page applications of the glass system ---------- */
