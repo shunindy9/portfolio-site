@@ -1844,6 +1844,15 @@ html.cursor-none * { cursor: none; }
   -webkit-mask-image: radial-gradient(circle, #000 0%, #000 42%, transparent 72%);
   mask-image: radial-gradient(circle, #000 0%, #000 42%, transparent 72%);
 }
+/* Over text — keep the element the SAME size (no resize churn) but swap to
+ * the gentle ripple filter and tighten the mask so the warp shrinks to a
+ * small, vague ripple. Reading is barely disturbed. */
+.cursor.is-over-text .cursor-lens {
+  -webkit-backdrop-filter: url(#cursor-refract-soft);
+  backdrop-filter: url(#cursor-refract-soft);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, #000 12%, transparent 28%);
+  mask-image: radial-gradient(circle, #000 0%, #000 12%, transparent 28%);
+}
 
 @media (hover: none) {
   html.cursor-none, html.cursor-none * { cursor: auto; }

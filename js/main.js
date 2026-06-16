@@ -648,11 +648,18 @@
       // Pure refraction: warp the backdrop with one displacement so all
       // channels move together — bends/distorts the scene without any
       // colour shift. No animation, no overlay.
+      // #cursor-refract — full strength over the background.
+      // #cursor-refract-soft — a tiny ripple used over text so reading
+      // is barely disturbed.
       holder.innerHTML =
         '<svg width="0" height="0"><defs>' +
         '<filter id="cursor-refract" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">' +
         '<feTurbulence type="fractalNoise" baseFrequency="0.008 0.01" numOctaves="2" seed="6" result="n"/>' +
         '<feDisplacementMap in="SourceGraphic" in2="n" scale="74" xChannelSelector="R" yChannelSelector="G"/>' +
+        '</filter>' +
+        '<filter id="cursor-refract-soft" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.02 0.022" numOctaves="2" seed="6" result="n"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/>' +
         '</filter></defs></svg>';
       document.body.appendChild(holder);
     }
@@ -663,25 +670,30 @@
     document.body.appendChild(wrap);
     document.documentElement.classList.add("cursor-none");
 
-    let x = 0, y = 0, pending = false;
+    // Text under the cursor → shrink + soften the lens (.is-over-text in
+    // CSS). Interactive elements → .is-hover. The cursor is
+    // pointer-events:none, so the pointermove event's own target is the
+    // real element beneath it — closest() on it is a cheap DOM walk (no
+    // layout flush, unlike elementFromPoint).
+    const TEXT = "h1,h2,h3,h4,p,li,a,time,.info-list__key,.info-list__val,.nav-label,.site-mark";
+    const INTERACTIVE = "a,button,input,label,select,textarea,summary,[role=button]";
+    let x = 0, y = 0, target = null, pending = false, lastText = false, lastHover = false;
     window.addEventListener("pointermove", (e) => {
-      x = e.clientX; y = e.clientY;
+      x = e.clientX; y = e.clientY; target = e.target;
       if (pending) return;
       pending = true;
       requestAnimationFrame(() => {
         pending = false;
         wrap.style.transform = `translate3d(${x}px,${y}px,0)`;
+        const el = target;
+        const t = !!(el && el.closest && el.closest(TEXT));
+        const h = !!(el && el.closest && el.closest(INTERACTIVE));
+        if (t !== lastText) { wrap.classList.toggle("is-over-text", t); lastText = t; }
+        if (h !== lastHover) { wrap.classList.toggle("is-hover", h); lastHover = h; }
       });
     }, { passive: true });
     window.addEventListener("pointerdown", () => wrap.classList.add("is-down"));
     window.addEventListener("pointerup", () => wrap.classList.remove("is-down"));
-    const INTERACTIVE = "a,button,input,label,select,textarea,summary,[role=button]";
-    document.addEventListener("pointerover", (e) => {
-      if (e.target.closest && e.target.closest(INTERACTIVE)) wrap.classList.add("is-hover");
-    });
-    document.addEventListener("pointerout", (e) => {
-      if (e.target.closest && e.target.closest(INTERACTIVE)) wrap.classList.remove("is-hover");
-    });
   }
 
   /* ============================================================
